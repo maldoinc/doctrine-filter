@@ -93,11 +93,8 @@ public function getUsers(Request $request, UserRepository $userRepository)
     $qb = $userRepository->createQueryBuilder('u');
     DoctrineFilter::applyFromArray($qb, $request->query->all());
     
-    // ...
-    
-    // Hypothetical method which paginates the query builder 
-    // based on the current request and returns the retreived results
-    return $this->createPaginatedResponse($qb);
+    // Further process or paginate the data as necessary.
+    return ...
 }
 ```
 
