@@ -72,6 +72,10 @@ GET /customers?subscription[is_null]
 // Returns all users belonging to the USER role
 // Ordered by their last name in a descending order
 GET /users?role[in][]=USER&orderBy[lastName]=desc
+
+// For this query only the status filter and order by id desc will be applied.
+// Any keys not in the specified filter or oderBy format will be ignored
+GET /todos?status[eq]=complete&page=1&perPage=10&orderBy[id]=desc
 ``` 
 
 ## Installation
