@@ -36,13 +36,13 @@ class DoctrineFilter
         return $aliases[0];
     }
 
-    public static function applyFromArray(QueryBuilder $queryBuilder, $filters)
+    protected static function applyFiltersFromArray(QueryBuilder $queryBuilder, $filters)
     {
         $alias = self::getRootAlias($queryBuilder);
         $index = 0;
 
         foreach ($filters as $field => $fieldFilters) {
-            if (!is_array($fieldFilters)) {
+            if (!is_array($fieldFilters) || $field === 'orderBy') {
                 continue;
             }
 
@@ -72,6 +72,22 @@ class DoctrineFilter
                 $index++;
             }
         }
+    }
+
+    private static function applySortingFromArray(QueryBuilder $queryBuilder, $orderBy)
+    {
+        foreach ($orderBy as $field => $direction) {
+            $queryBuilder->addOrderBy($field, strtolower($direction));
+        }
+    }
+
+    public static function applyFromArray(QueryBuilder $queryBuilder, $filters)
+    {
+        if (isset($filters['orderBy'])) {
+            self::applySortingFromArray($queryBuilder, $filters['orderBy']);
+        }
+
+        self::applyFiltersFromArray($queryBuilder, $filters);
     }
 
     public static function applyFromQueryString(QueryBuilder $queryBuilder, $queryString)

@@ -118,4 +118,32 @@ class DoctrineFilterTest extends TestCase
             'ignored=this&age[gt]=50&prop[DUMMY]=yes'
         );
     }
+
+    public function orderByDataProvider(): array
+    {
+        return [
+            ['', ''],
+            ['id asc, name desc', 'orderBy[id]=asc&orderBy[name]=desc'],
+            ['id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
+            ['id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
+        ];
+    }
+
+    /**
+     * @dataProvider orderByDataProvider
+     */
+    public function testOrderBy($orderByClause, $queryString)
+    {
+        $qb = $this->createQueryBuilder();
+        DoctrineFilter::applyFromQueryString($qb, $queryString);
+
+        $dql = $queryString ? "SELECT FROM Entity x ORDER BY $orderByClause" : "SELECT FROM Entity x";
+
+        $this->assertEquals($dql, $qb->getQuery()->getDQL());
+    }
+
+    public function testFilterAndOrderBy()
+    {
+
+    }
 }
