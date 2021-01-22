@@ -31,6 +31,16 @@ The syntax to construct the query string is as follows: `field[operator]=value`
 | `is_null`       | Is null               |
 | `is_not_null`   | Is not null           |
 
+
+### Ordering
+
+Ordering is applied via the `orderBy` query string key, which also means that it is not a valid field name to use 
+for ordering your data. Ordering is applied via the following syntax: `orderBy[fieldName]=direction` where direction
+can be either `asc` or `desc`. 
+
+The `orderBy` key can be used multiple times to allow sorting by multiple fields.
+E.g: `orderBy[id]=desc&orderBy[lastName]=asc`
+
 #### Examples
 
 ```http request
@@ -45,6 +55,10 @@ GET /users?tag[in][]=red&tag[in][]=yellow
 
 // Returns customers whose subscription field is null
 GET /customers?subscription[is_null]
+
+// Returns all users belonging to the USER role
+// Ordered by their last name in a descending order
+GET /users?role[in][]=USER&orderBy[lastName]=desc
 ``` 
 
 ## Installation
