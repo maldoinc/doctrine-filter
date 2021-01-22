@@ -1,22 +1,35 @@
 # doctrine-filter
 
-Quickly apply filters to a Doctrine Query Builder from the query string
+Quickly add advanced filtering/searching and sorting capabilities to any resource in your APIs or Web apps
+that use Doctrine.
 
 ---
 
 ## Purpose
 
-This library allows you to apply filters to a Doctrine Query Builder instance based on the input from the query string
+This library allows you to apply filters to a Doctrine Query Builder instance based on the input from the query string,
 allowing your application or Api to implement a common filtering scheme for all the exposed resources.
 
 Note that this library provides only filtering of the Query Builder. 
 Those looking for pagination can use this library in conjunction with [BabDev/Pagerfanta](https://github.com/BabDev/Pagerfanta).
 
+## Filtering and Sorting
+
+The library provides two methods, `applyFromQueryString` and `applyFromArray` which modify the Query Builder
+according to the current request.
+
+
+When using the `applyFromQueryString` method the query string is parsed via php's [parse_str](https://www.php.net/manual/en/function.parse-str.php) method.
+
+The syntax to construct the query string is as follows: `field[operator]=value` or `field[operator][]=value`
+for operations such as `in` or `not in` which work with arrays.
+
+You can also use `applyFromArray` when using some component to access the current request, such as Symfony's `Request`, 
+as long as the query string is parsed via `parse_str`.
+
+Symfony example: `DoctrineFilter::applyFromArray($qb, $request->query->all());`
+
 ### Filtering
-
-Filters are applied via query string which then are parsed via php's `parse_str` method.
-
-The syntax to construct the query string is as follows: `field[operator]=value`
 
 | Operator | Description
 | --------------- | --------------------- |
