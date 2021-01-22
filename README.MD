@@ -24,12 +24,17 @@ When using the `applyFromQueryString` method the query string is parsed via php'
 The syntax to construct the query string is as follows: `field[operator]=value` or `field[operator][]=value`
 for operations such as `in` or `not in` which work with arrays.
 
+The syntax for the unary operators such as `is null` or `is not null` is `field[is_null]` or `field[is_null]=1` the value
+part of the query string will be discarded as it cannot be used.
+
 You can also use `applyFromArray` when using some component to access the current request, such as Symfony's `Request`, 
 as long as the query string is parsed via `parse_str`.
 
 Symfony example: `DoctrineFilter::applyFromArray($qb, $request->query->all());`
 
 ### Filtering
+
+The supported filter operators are listed below
 
 | Operator | Description
 | --------------- | --------------------- |
@@ -43,7 +48,6 @@ Symfony example: `DoctrineFilter::applyFromArray($qb, $request->query->all());`
 | `not_in`        | Not in                |
 | `is_null`       | Is null               |
 | `is_not_null`   | Is not null           |
-
 
 ### Ordering
 
