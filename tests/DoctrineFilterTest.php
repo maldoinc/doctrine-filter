@@ -2,8 +2,13 @@
 
 namespace App\Tests;
 
+use App\Tests\Entity\TestEntity;
+use App\Tests\Entity\User;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Query\Parameter;
+use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Setup;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
@@ -12,13 +17,26 @@ use PHPUnit\Framework\TestCase;
 
 class DoctrineFilterTest extends TestCase
 {
+    private function isValidDql(QueryBuilder $queryBuilder): bool
+    {
+        $parser = new Parser($queryBuilder->getQuery());
+        $parser->parse();
+
+        return true;
+    }
+
     private function createQueryBuilder(): QueryBuilder
     {
-        $dbParams = array('driver' => 'pdo_sqlite', 'memory' => true);
-        $entityManager = EntityManager::create($dbParams, Setup::createAnnotationMetadataConfiguration([]));
+        $config = Setup::createConfiguration(true);
+        $driver = new AnnotationDriver(new AnnotationReader(), [
+            __DIR__ . '/Entity'
+        ]);
+
+        $config->setMetadataDriverImpl($driver);
+        $entityManager = EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);
 
         $qb = new QueryBuilder($entityManager);
-        $qb->from('Entity', 'x');
+        $qb->from(TestEntity::class, 'x')->select('x');
 
         return $qb;
     }
@@ -41,20 +59,20 @@ class DoctrineFilterTest extends TestCase
             ],
 
             [
-                'x.tag IN :doctrine_filter_tag_in_0',
+                'x.tag IN (:doctrine_filter_tag_in_0)',
                 ['tag' => ['in' => ['red', 'green', 'blue']]],
                 ['doctrine_filter_tag_in_0' => ['red', 'green', 'blue']]
             ],
 
             [
-                'x.field IS NULL',
-                ['field' => ['IS_NULL' => 1]],
+                'x.id IS NULL',
+                ['id' => ['IS_NULL' => 1]],
                 []
             ],
 
             [
-                'x.field IS NOT NULL',
-                ['field' => ['IS_NOT_NULL' => 1]],
+                'x.id IS NOT NULL',
+                ['id' => ['IS_NOT_NULL' => 1]],
                 []
             ],
 
@@ -81,7 +99,7 @@ class DoctrineFilterTest extends TestCase
         $qb = $this->createQueryBuilder();
 
         DoctrineFilter::applyFromArray($qb, $array);
-        $baseQuery = "SELECT FROM Entity x";
+        $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x";
 
         if (count(array_keys($array)) > 0) {
             $baseQuery .= " WHERE ";
@@ -94,6 +112,8 @@ class DoctrineFilterTest extends TestCase
             $this->assertArrayHasKey($parameter->getName(), $parameters);
             $this->assertEquals($parameters[$parameter->getName()], $parameter->getValue());
         }
+
+        $this->assertTrue($this->isValidDql($qb));
     }
 
     public function testFromQueryStringIgnoreKeyValueFormat()
@@ -102,12 +122,13 @@ class DoctrineFilterTest extends TestCase
         DoctrineFilter::applyFromQueryString($qb, 'ignored=this&age[gt]=50&this=that');
 
         $this->assertEquals(
-            'SELECT FROM Entity x WHERE x.age > :doctrine_filter_age_gt_0',
+            'SELECT x FROM App\Tests\Entity\TestEntity x WHERE x.age > :doctrine_filter_age_gt_0',
             $qb->getQuery()->getDQL()
         );
         $this->assertEquals(1, $qb->getParameters()->count());
         $this->assertEquals('doctrine_filter_age_gt_0', $qb->getParameters()->first()->getName());
         $this->assertEquals(50, $qb->getParameters()->first()->getValue());
+        $this->assertTrue($this->isValidDql($qb));
     }
 
     public function testInvalidOperators()
@@ -137,13 +158,9 @@ class DoctrineFilterTest extends TestCase
         $qb = $this->createQueryBuilder();
         DoctrineFilter::applyFromQueryString($qb, $queryString);
 
-        $dql = $queryString ? "SELECT FROM Entity x ORDER BY $orderByClause" : "SELECT FROM Entity x";
+        $dql = $queryString ? "SELECT x FROM App\Tests\Entity\TestEntity x ORDER BY $orderByClause" : "SELECT x FROM App\Tests\Entity\TestEntity x";
 
         $this->assertEquals($dql, $qb->getQuery()->getDQL());
-    }
-
-    public function testFilterAndOrderBy()
-    {
-
+        $this->isValidDql($qb);
     }
 }
