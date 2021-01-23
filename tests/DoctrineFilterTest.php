@@ -123,9 +123,9 @@ class DoctrineFilterTest extends TestCase
     {
         return [
             ['', ''],
-            ['id asc, name desc', 'orderBy[id]=asc&orderBy[name]=desc'],
-            ['id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
-            ['id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
+            ['x.id asc, x.name desc', 'orderBy[id]=asc&orderBy[name]=desc'],
+            ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
+            ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
         ];
     }
 
