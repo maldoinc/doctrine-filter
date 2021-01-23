@@ -76,8 +76,10 @@ class DoctrineFilter
 
     private static function applySortingFromArray(QueryBuilder $queryBuilder, $orderBy)
     {
+        $alias = self::getRootAlias($queryBuilder);
+
         foreach ($orderBy as $field => $direction) {
-            $queryBuilder->addOrderBy($field, strtolower($direction));
+            $queryBuilder->addOrderBy("$alias.$field", strtolower($direction));
         }
     }
 
