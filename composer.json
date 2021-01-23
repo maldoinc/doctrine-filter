@@ -1,5 +1,6 @@
 {
     "name": "maldoinc/doctrine-filter",
+    "version": "0.1",
     "description": "Add filtering to Doctrine from the query string",
     "require": {
         "php": "^7|^8",
