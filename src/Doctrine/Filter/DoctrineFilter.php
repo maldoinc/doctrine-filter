@@ -60,8 +60,12 @@ class DoctrineFilter
                 if (in_array($operator, array_keys(self::BINARY_OPS))) {
                     $dqlOperator = self::BINARY_OPS[$operator];
                     $param_name = "doctrine_filter_{$field}_{$operator}_{$index}";
+                    $bindParamString = ($operator === 'in' || $operator === 'not_in')
+                        ? "(:$param_name)"
+                        : ":$param_name";
 
-                    $queryBuilder->andWhere(sprintf("$alias.$field $dqlOperator :$param_name"))
+                    $queryBuilder
+                        ->andWhere(sprintf("$alias.$field $dqlOperator $bindParamString"))
                         ->setParameter($param_name, $value);
                 } else {
                     $dqlOperator = self::UNARY_OPS[$operator];
