@@ -5,6 +5,31 @@ that use Doctrine.
 
 ---
 
+#### Examples
+
+The following are some query examples showcasing the different filtering and sorting capabilities of the library.
+
+```http request
+// Returns products with a price range between 100 and 200
+GET /products?price[gte]=100&price[lte]=200
+
+// Returns all users with a birthday after 1 Jan 2000
+GET /users?birthday[gte]=2000-01-01
+
+// Returns users with ids 1 or 2
+GET /users?id[in][]=1&id[in][]=2
+
+// Returns customers whose subscription field is null
+GET /customers?subscription[is_null]
+
+// Returns all users ordered by their last name in a descending order
+GET /users?orderBy[lastName]=desc
+
+// For this query only the status filter and order by id desc will be applied.
+// Any keys not in the specified filter or oderBy format will be ignored
+GET /todos?status[eq]=complete&page=1&perPage=10&orderBy[id]=desc
+``` 
+
 ## Purpose
 
 This library allows you to apply filters to a Doctrine Query Builder instance based on the input from the query string,
@@ -15,39 +40,39 @@ Those looking for pagination can use this library in conjunction with [BabDev/Pa
 
 ## Filtering and Sorting
 
-The library provides two methods, `applyFromQueryString` and `applyFromArray` which modify the Query Builder
-according to the current request.
+```php
 
+use Maldoinc\Doctrine\Filter\DoctrineFilter;
 
-When using the `applyFromQueryString` method the query string is parsed via php's [parse_str](https://www.php.net/manual/en/function.parse-str.php) method.
+... 
 
-The syntax to construct the query string is as follows: `field[operator]=value` or `field[operator][]=value`
-for operations such as `in` or `not in` which work with arrays.
+// When using a framework such as Symfony you may use the Request class
+// The applyFromArray function is compatible with any request class
+// which internally parses the query string via php's parse_str method.
+DoctrineFilter::applyFromArray($qb, $request->query->all());
 
-The syntax for the unary operators such as `is null` or `is not null` is `field[is_null]` or `field[is_null]=1` the value
-part of the query string will be discarded as it cannot be used.
-
-You can also use `applyFromArray` when using some component to access the current request, such as Symfony's `Request`, 
-as long as the query string is parsed via `parse_str`.
-
-Symfony example: `DoctrineFilter::applyFromArray($qb, $request->query->all());`
+// Additionally, you can also pass the query string directly
+// although the applyFromArray is the preferred method.
+DoctrineFilter::applyFromQueryString($qb, $_SERVER['QUERY_STRING']);
+```
 
 ### Filtering
 
-The supported filter operators are listed below
+The clients need to send the request in PHP's own query string syntax which differs from the
+standard CGI query string format. Below is a complete list of the supported operators.
 
-| Operator | Description
-| --------------- | --------------------- |
-| `eq`            | Equality              |
-| `neq`           | Inequality            |
-| `gt`            | Greater than          |
-| `gte`           | Greater than or equal |
-| `lt`            | Less than             |
-| `lte`           | Less than or equal    |
-| `in`            | In                    |
-| `not_in`        | Not in                |
-| `is_null`       | Is null               |
-| `is_not_null`   | Is not null           |
+| Operator        | Description           | Example
+| --------------- | --------------------- | -----------------
+| `eq`            | Equality              | `name[eq]=Jimothy`
+| `neq`           | Inequality            | `status[neq]=backlog`
+| `gt`            | Greater than          | `price[gt]=10`
+| `gte`           | Greater than or equal | `price[gte]=10`
+| `lt`            | Less than             | `stock[lt]=100`
+| `lte`           | Less than or equal    | `stock[lte]=100`
+| `in`            | In                    | `id[in][]=1&id[in][]=2`
+| `not_in`        | Not in                | `roles[not_in][]=ROLE_ADMIN`
+| `is_null`       | Is null               | `subscribedAt[is_null]`
+| `is_not_null`   | Is not null           | `subscribedAt[is_not_null]`
 
 ### Ordering
 
@@ -57,30 +82,6 @@ can be either `asc` or `desc`.
 
 The `orderBy` key can be used multiple times to allow sorting by multiple fields.
 E.g: `orderBy[id]=desc&orderBy[lastName]=asc`
-
-#### Examples
-
-```http request
-// Returns products with a price range between 100 and 200
-GET /products?price[gte]=100&price[lte]=200
-
-// Returns all users with a birthday after 1 Jan 2000
-GET /users?birthday[gte]=2000-01-01
-
-// Returns users with "tag" property being either red or yellow
-GET /users?tag[in][]=red&tag[in][]=yellow
-
-// Returns customers whose subscription field is null
-GET /customers?subscription[is_null]
-
-// Returns all users belonging to the USER role
-// Ordered by their last name in a descending order
-GET /users?role[in][]=USER&orderBy[lastName]=desc
-
-// For this query only the status filter and order by id desc will be applied.
-// Any keys not in the specified filter or oderBy format will be ignored
-GET /todos?status[eq]=complete&page=1&perPage=10&orderBy[id]=desc
-``` 
 
 ## Installation
 
@@ -92,17 +93,50 @@ composer require maldoinc/doctrine-filters
 
 ## Usage in a controller
 
-```php
-# GET /users?age[gt]=18&age[lt]=35
+You may wish to call this library in a base EntityRepository or Controller class to ensure that it is applied to all
+resources and avoiding code duplication. An example implementation on Symfony 5 may look as follows
 
-#[Route("/users")]
-public function getUsers(Request $request, UserRepository $userRepository)
+```php
+abstract class ApiController extends Controller
 {
-    $qb = $userRepository->createQueryBuilder('u');
-    DoctrineFilter::applyFromArray($qb, $request->query->all());
+    #[Required]
+    public RequestStack $requestStack;
     
-    // Further process or paginate the data as necessary.
-    return ...
+    /**
+    * Filters, sorts and paginates the query builder from the query request parameters
+    * Using maldoinc/doctrine-filter for the filtering and sorting 
+    * and BabDev/Pagerfanta for pagination
+    */
+    public function createEntityJsonResponse(QueryBuilder $queryBuilder): JsonResponse
+    {
+        $query = $this->requestStack->getCurrentRequest()->query;
+
+        DoctrineFilter::applyFromArray($queryBuilder, $query->all());
+
+        $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
+        $pagerfanta->setMaxPerPage($query->getInt('perPage', 10));
+        $pagerfanta->setCurrentPage($query->getInt('page', 1));
+
+        return $this->json([
+            'data' => $pagerfanta->getCurrentPageResults(),
+            'pagination' => [
+                'current_page' => $pagerfanta->getCurrentPage(),
+                'total_pages' => $pagerfanta->getNbPages(),
+                'per_page' => $pagerfanta->getMaxPerPage(),
+                'count' => $pagerfanta->getNbResults()
+            ]
+        ]);
+    }
+}
+
+
+class UsersController extends ApiController
+{
+    #[Route("/users")]
+    public function getUsers(UserRepository $userRepository)
+    { 
+        return $this->createEntityJsonResponse($userRepository->createQueryBuilder('u'))
+    }
 }
 ```
 
