@@ -20,10 +20,35 @@ class DoctrineFilter
         'lt' => '<',
         'lte' => '<=',
         'in' => 'IN',
-        'not_in' => 'NOT IN'
+        'not_in' => 'NOT IN',
+        'contains' => 'like',
+        'starts_with' => 'like',
+        'ends_with' => 'like'
     ];
 
     const OPERATIONS = self::BINARY_OPS + self::UNARY_OPS;
+
+    private static function escapeLike($search)
+    {
+        return str_replace(['%', '_'], ['\\%', '\\_'], $search);
+    }
+
+    private static function prepareValue($operator, $input)
+    {
+        if ($operator === 'starts_with') {
+            return self::escapeLike($input) . '%';
+        }
+
+        if ($operator === 'ends_with') {
+            return '%' . self::escapeLike($input);
+        }
+
+        if ($operator === 'contains') {
+            return '%' . self::escapeLike($input) . '%';
+        }
+
+        return $input;
+    }
 
     private static function getRootAlias(QueryBuilder $qb)
     {
@@ -66,7 +91,7 @@ class DoctrineFilter
 
                     $queryBuilder
                         ->andWhere(sprintf("$alias.$field $dqlOperator $bindParamString"))
-                        ->setParameter($param_name, $value);
+                        ->setParameter($param_name, self::prepareValue($operator, $value));
                 } else {
                     $dqlOperator = self::UNARY_OPS[$operator];
 

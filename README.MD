@@ -19,6 +19,9 @@ GET /users?birthday[gte]=2000-01-01
 // Returns users with ids 1 or 2
 GET /users?id[in][]=1&id[in][]=2
 
+// Returns all users with an email ending with gmail.com
+GET /users?email[ends_with]=gmail.com
+
 // Returns customers whose subscription field is null
 GET /customers?subscription[is_null]
 
@@ -73,6 +76,9 @@ standard CGI query string format. Below is a complete list of the supported oper
 | `not_in`        | Not in                | `roles[not_in][]=ROLE_ADMIN`
 | `is_null`       | Is null               | `subscribedAt[is_null]`
 | `is_not_null`   | Is not null           | `subscribedAt[is_not_null]`
+| `starts_with`   | Starts with           | `name[starts_with]=a`
+| `ends_with`     | Ends with             | `email[ends_with]=@gmail.com`
+| `contains`      | Contains              | `name[containts]=d`
 
 ### Ordering
 
