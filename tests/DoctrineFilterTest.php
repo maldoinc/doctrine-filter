@@ -87,6 +87,30 @@ class DoctrineFilterTest extends TestCase
                 ['name' => ['neq' => 'Jimothy']],
                 ['doctrine_filter_name_neq_0' => 'Jimothy']
             ],
+
+            [
+                "x.name like :doctrine_filter_name_contains_0",
+                ['name' => ['contains' => 'a']],
+                ['doctrine_filter_name_contains_0' => '%a%']
+            ],
+
+            [
+                "x.name like :doctrine_filter_name_ends_with_0",
+                ['name' => ['ends_with' => 'a']],
+                ['doctrine_filter_name_ends_with_0' => '%a']
+            ],
+
+            [
+                "x.name like :doctrine_filter_name_starts_with_0",
+                ['name' => ['starts_with' => 'a']],
+                ['doctrine_filter_name_starts_with_0' => 'a%']
+            ],
+
+            [
+                "x.name like :doctrine_filter_name_starts_with_0",
+                ['name' => ['starts_with' => '%']],
+                ['doctrine_filter_name_starts_with_0' => '\\%%']
+            ],
         ];
     }
 
