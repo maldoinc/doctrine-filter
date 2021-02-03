@@ -122,7 +122,7 @@ class DoctrineFilterTest extends TestCase
     {
         $qb = $this->createQueryBuilder();
 
-        DoctrineFilter::applyFromArray($qb, $array);
+        (new DoctrineFilter($qb))->applyFromArray($array);
         $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x";
 
         if (count(array_keys($array)) > 0) {
@@ -143,7 +143,7 @@ class DoctrineFilterTest extends TestCase
     public function testFromQueryStringIgnoreKeyValueFormat()
     {
         $qb = $this->createQueryBuilder();
-        DoctrineFilter::applyFromQueryString($qb, 'ignored=this&age[gt]=50&this=that');
+        (new DoctrineFilter($qb))->applyFromQueryString('ignored=this&age[gt]=50&this=that');
 
         $this->assertEquals(
             'SELECT x FROM App\Tests\Entity\TestEntity x WHERE x.age > :doctrine_filter_age_gt_0',
@@ -158,10 +158,9 @@ class DoctrineFilterTest extends TestCase
     public function testInvalidOperators()
     {
         $this->expectException(InvalidFilterOperatorException::class);
-        DoctrineFilter::applyFromQueryString(
-            $this->createQueryBuilder(),
-            'ignored=this&age[gt]=50&prop[DUMMY]=yes'
-        );
+        $qb = $this->createQueryBuilder();
+
+        (new DoctrineFilter($qb))->applyFromQueryString('ignored=this&age[gt]=50&prop[DUMMY]=yes');
     }
 
     public function orderByDataProvider(): array
@@ -180,7 +179,7 @@ class DoctrineFilterTest extends TestCase
     public function testOrderBy($orderByClause, $queryString)
     {
         $qb = $this->createQueryBuilder();
-        DoctrineFilter::applyFromQueryString($qb, $queryString);
+        (new DoctrineFilter($qb))->applyFromQueryString($queryString);
 
         $dql = $queryString ? "SELECT x FROM App\Tests\Entity\TestEntity x ORDER BY $orderByClause" : "SELECT x FROM App\Tests\Entity\TestEntity x";
 
