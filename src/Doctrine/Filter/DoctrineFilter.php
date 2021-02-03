@@ -28,31 +28,41 @@ class DoctrineFilter
 
     const OPERATIONS = self::BINARY_OPS + self::UNARY_OPS;
 
-    private static function escapeLike($search)
+    private $queryBuilder;
+    private $parameterIndex = 0;
+    private $rootAlias;
+
+    public function __construct(QueryBuilder $queryBuilder)
+    {
+        $this->queryBuilder = $queryBuilder;
+        $this->rootAlias = $this->getRootAlias();
+    }
+
+    private function escapeLike($search)
     {
         return str_replace(['%', '_'], ['\\%', '\\_'], $search);
     }
 
-    private static function prepareValue($operator, $input)
+    private function prepareValue($operator, $input)
     {
         if ($operator === 'starts_with') {
-            return self::escapeLike($input) . '%';
+            return $this->escapeLike($input) . '%';
         }
 
         if ($operator === 'ends_with') {
-            return '%' . self::escapeLike($input);
+            return '%' . $this->escapeLike($input);
         }
 
         if ($operator === 'contains') {
-            return '%' . self::escapeLike($input) . '%';
+            return '%' . $this->escapeLike($input) . '%';
         }
 
         return $input;
     }
 
-    private static function getRootAlias(QueryBuilder $qb)
+    private function getRootAlias()
     {
-        $aliases = $qb->getRootAliases();
+        $aliases = $this->queryBuilder->getRootAliases();
 
         if (!isset($aliases[0])) {
             throw new \Exception('The query builder must contain at least one alias');
@@ -61,10 +71,9 @@ class DoctrineFilter
         return $aliases[0];
     }
 
-    protected static function applyFiltersFromArray(QueryBuilder $queryBuilder, $filters)
+    protected function applyFiltersFromArray($filters)
     {
-        $alias = self::getRootAlias($queryBuilder);
-        $index = 0;
+        $this->parameterIndex = 0;
 
         foreach ($filters as $field => $fieldFilters) {
             if (!is_array($fieldFilters) || $field === 'orderBy') {
@@ -83,47 +92,56 @@ class DoctrineFilter
                 }
 
                 if (in_array($operator, array_keys(self::BINARY_OPS))) {
-                    $dqlOperator = self::BINARY_OPS[$operator];
-                    $param_name = "doctrine_filter_{$field}_{$operator}_{$index}";
-                    $bindParamString = ($operator === 'in' || $operator === 'not_in')
-                        ? "(:$param_name)"
-                        : ":$param_name";
-
-                    $queryBuilder
-                        ->andWhere(sprintf("$alias.$field $dqlOperator $bindParamString"))
-                        ->setParameter($param_name, self::prepareValue($operator, $value));
+                    $this->applyBinaryFilter($field, $operator, $value);
                 } else {
-                    $dqlOperator = self::UNARY_OPS[$operator];
-
-                    $queryBuilder->andWhere(sprintf("$alias.$field $dqlOperator"));
+                    $this->applyUnaryFilter($field, $operator);
                 }
 
-                $index++;
+                $this->parameterIndex++;
             }
         }
     }
 
-    private static function applySortingFromArray(QueryBuilder $queryBuilder, $orderBy)
+    private function applyUnaryFilter(string $field, string $operator)
     {
-        $alias = self::getRootAlias($queryBuilder);
+        $dqlOperator = self::UNARY_OPS[$operator];
 
+        $this->queryBuilder->andWhere(sprintf("{$this->rootAlias}.$field $dqlOperator"));
+    }
+
+    private function applyBinaryFilter(string $field, string $operator, $value)
+    {
+        $alias = $this->rootAlias;
+        $dqlOperator = self::BINARY_OPS[$operator];
+        $param_name = "doctrine_filter_{$field}_{$operator}_{$this->parameterIndex}";
+        $bindParamString = ($operator === 'in' || $operator === 'not_in')
+            ? "(:$param_name)"
+            : ":$param_name";
+
+        $this->queryBuilder
+            ->andWhere(sprintf("$alias.$field $dqlOperator $bindParamString"))
+            ->setParameter($param_name, $this->prepareValue($operator, $value));
+    }
+
+    private function applySortingFromArray($orderBy)
+    {
         foreach ($orderBy as $field => $direction) {
-            $queryBuilder->addOrderBy("$alias.$field", strtolower($direction));
+            $this->queryBuilder->addOrderBy("{$this->rootAlias}.$field", strtolower($direction));
         }
     }
 
-    public static function applyFromArray(QueryBuilder $queryBuilder, $filters)
+    public function applyFromArray($filters)
     {
         if (isset($filters['orderBy'])) {
-            self::applySortingFromArray($queryBuilder, $filters['orderBy']);
+            $this->applySortingFromArray($filters['orderBy']);
         }
 
-        self::applyFiltersFromArray($queryBuilder, $filters);
+        $this->applyFiltersFromArray($filters);
     }
 
-    public static function applyFromQueryString(QueryBuilder $queryBuilder, $queryString)
+    public function applyFromQueryString($queryString)
     {
         parse_str($queryString, $res);
-        self::applyFromArray($queryBuilder, $res);
+        $this->applyFromArray($res);
     }
 }
