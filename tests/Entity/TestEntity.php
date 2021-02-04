@@ -37,4 +37,11 @@ class TestEntity
      * @var array<string>
      */
     public $tag = [];
+
+    public $notMappedForFiltering;
+
+    /**
+     * @FilterExpose(serializedName="serialized_with_underscores")
+     */
+    public $serializedWithUnderscores;
 }
