@@ -82,6 +82,7 @@ class DoctrineFilter
 
             foreach ($fieldFilters as $operator => $value) {
                 $operator = strtolower($operator);
+                $dqlField = $exposedFields[$field];
 
                 if (!in_array($operator, array_keys(self::OPERATIONS))) {
                     throw new InvalidFilterOperatorException(sprintf(
@@ -92,9 +93,9 @@ class DoctrineFilter
                 }
 
                 if (in_array($operator, array_keys(self::BINARY_OPS))) {
-                    $this->applyBinaryFilter($field, $operator, $value);
+                    $this->applyBinaryFilter($dqlField, $operator, $value);
                 } else {
-                    $this->applyUnaryFilter($field, $operator);
+                    $this->applyUnaryFilter($dqlField, $operator);
                 }
 
                 $this->parameterIndex++;

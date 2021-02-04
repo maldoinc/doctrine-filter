@@ -119,6 +119,12 @@ class DoctrineFilterTest extends TestCase
                 ['name' => ['starts_with' => '%']],
                 ['doctrine_filter_name_starts_with_0' => '\\%%']
             ],
+
+            [
+                "x.serializedWithUnderscores = :doctrine_filter_serializedWithUnderscores_eq_0",
+                ["serialized_with_underscores" => ["eq" => 1]],
+                ['doctrine_filter_serializedWithUnderscores_eq_0' => 1]
+            ]
         ];
     }
 
