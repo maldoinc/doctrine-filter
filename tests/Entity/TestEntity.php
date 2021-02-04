@@ -41,6 +41,7 @@ class TestEntity
     public $notMappedForFiltering;
 
     /**
+     * @ORM\Column(type="integer")
      * @FilterExpose(serializedName="serialized_with_underscores")
      */
     public $serializedWithUnderscores;
