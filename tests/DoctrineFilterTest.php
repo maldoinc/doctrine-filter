@@ -13,6 +13,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Setup;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
+use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
 use PHPUnit\Framework\TestCase;
 
@@ -153,6 +154,13 @@ class DoctrineFilterTest extends TestCase
         }
 
         $this->assertTrue($this->isValidDql($qb));
+    }
+
+    public function testNoRootAlias()
+    {
+        $this->expectException(EmptyQueryBuilderException::class);
+
+        (new DoctrineFilter(new QueryBuilder($this->entityManager)))->applyFromArray([], []);
     }
 
     public function testFromQueryStringIgnoreKeyValueFormat()

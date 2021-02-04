@@ -4,6 +4,7 @@ namespace Maldoinc\Doctrine\Filter;
 
 use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
+use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 
 class DoctrineFilter
 {
@@ -65,7 +66,7 @@ class DoctrineFilter
         $aliases = $this->queryBuilder->getRootAliases();
 
         if (!isset($aliases[0])) {
-            throw new \Exception('The query builder must contain at least one alias');
+            throw new EmptyQueryBuilderException('Query builder must contain at least one alias');
         }
 
         return $aliases[0];
