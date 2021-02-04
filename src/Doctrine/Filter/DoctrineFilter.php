@@ -71,12 +71,12 @@ class DoctrineFilter
         return $aliases[0];
     }
 
-    protected function applyFiltersFromArray($filters)
+    protected function applyFiltersFromArray($filters, $exposedFields)
     {
         $this->parameterIndex = 0;
 
         foreach ($filters as $field => $fieldFilters) {
-            if (!is_array($fieldFilters) || $field === 'orderBy') {
+            if (!is_array($fieldFilters) || $field === 'orderBy' || !array_key_exists($field, $exposedFields)) {
                 continue;
             }
 
@@ -130,18 +130,18 @@ class DoctrineFilter
         }
     }
 
-    public function applyFromArray($filters)
+    public function applyFromArray($filters, $exposedFields)
     {
         if (isset($filters['orderBy'])) {
             $this->applySortingFromArray($filters['orderBy']);
         }
 
-        $this->applyFiltersFromArray($filters);
+        $this->applyFiltersFromArray($filters, $exposedFields);
     }
 
-    public function applyFromQueryString($queryString)
+    public function applyFromQueryString($queryString, $exposedFields)
     {
         parse_str($queryString, $res);
-        $this->applyFromArray($res);
+        $this->applyFromArray($res, $exposedFields);
     }
 }
