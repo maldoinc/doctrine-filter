@@ -14,10 +14,9 @@ class ExposedFieldsReader
         $reader = new AnnotationReader();
 
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            /** @var Expose $exposeAnnotation */
             $exposeAnnotation = $reader->getPropertyAnnotation($reflectionProperty, Expose::class);
 
-            if ($exposeAnnotation) {
+            if ($exposeAnnotation instanceof Expose) {
                 $serializedName = $exposeAnnotation->serializedName ?: $reflectionProperty->getName();
 
                 $result[$serializedName] = $reflectionProperty->getName();
