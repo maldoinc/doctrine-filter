@@ -26,36 +26,42 @@ class DoctrineFilter
     /** @var array<string, mixed> */
     private $ops;
 
+    /**
+     * @var array<string, string>
+     */
+    private $exposedFields;
+
     public function __construct(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
         $this->rootAlias = $this->getRootAlias();
+        // By this point we are guaranteed to have a root entity as getRootAlias
+        // would have raised an exception
+        $this->exposedFields = ExposedFieldsReader::readExposedFields($this->queryBuilder->getRootEntities()[0]);
 
         $this->initializeOperations();
     }
 
     /**
-     * @param array<string, string> $exposedFields
      * @throws InvalidFilterOperatorException
      */
-    public function applyFromQueryString(string $queryString, array $exposedFields): void
+    public function applyFromQueryString(string $queryString): void
     {
         parse_str($queryString, $res);
-        $this->applyFromArray($res, $exposedFields);
+        $this->applyFromArray($res);
     }
 
     /**
      * @param array<string, mixed> $filters
-     * @param array<string, string> $exposedFields
      * @throws InvalidFilterOperatorException
      */
-    public function applyFromArray(array $filters, array $exposedFields): void
+    public function applyFromArray(array $filters): void
     {
         if (isset($filters['orderBy'])) {
             $this->applySortingFromArray($filters['orderBy']);
         }
 
-        $this->applyFiltersFromArray($filters, $exposedFields);
+        $this->applyFiltersFromArray($filters);
     }
 
     private function getRootAlias(): string
@@ -152,21 +158,20 @@ class DoctrineFilter
 
     /**
      * @param array<string, array<string, string>> $filters
-     * @param array<string, string> $exposedFields
      * @throws InvalidFilterOperatorException
      */
-    private function applyFiltersFromArray(array $filters, array $exposedFields): void
+    private function applyFiltersFromArray(array $filters): void
     {
         $this->parameterIndex = 0;
 
         foreach ($filters as $field => $fieldFilters) {
-            if (!is_array($fieldFilters) || $field === 'orderBy' || !array_key_exists($field, $exposedFields)) {
+            if (!is_array($fieldFilters) || $field === 'orderBy' || !array_key_exists($field, $this->exposedFields)) {
                 continue;
             }
 
             foreach ($fieldFilters as $operator => $value) {
                 $operator = strtolower($operator);
-                $dqlField = $exposedFields[$field];
+                $dqlField = $this->exposedFields[$field];
 
                 if (!in_array($operator, array_keys($this->ops))) {
                     throw new InvalidFilterOperatorException(sprintf(
