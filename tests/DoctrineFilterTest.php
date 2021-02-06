@@ -126,6 +126,15 @@ class DoctrineFilterTest extends TestCase
         ];
     }
 
+    public function testNotExposedFields()
+    {
+        $qb = $this->createQueryBuilder();
+        $filter = new DoctrineFilter($qb);
+
+        $filter->applyFromArray(['not_exposed' => ['gte' => 5]]);
+        $this->assertEquals("SELECT x FROM App\Tests\Entity\TestEntity x", $qb->getQuery()->getDQL());
+    }
+
 
     /**
      * @dataProvider applyFromArrayDataProvider
