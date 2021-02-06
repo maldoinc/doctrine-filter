@@ -36,6 +36,6 @@ class BinaryFilterOperationDto
     {
         $transformer = $this->valueTransformer;
 
-        return is_callable($this->valueTransformer) ? $transformer($value) : $value;
+        return is_callable($transformer) ? $transformer($value) : $value;
     }
 }
