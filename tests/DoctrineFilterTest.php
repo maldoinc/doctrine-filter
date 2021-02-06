@@ -71,6 +71,12 @@ class DoctrineFilterTest extends TestCase
             ],
 
             [
+                'x.tag NOT IN(:doctrine_filter_tag_not_in_0)',
+                ['tag' => ['not_in' => ['red', 'green', 'blue']]],
+                ['doctrine_filter_tag_not_in_0' => ['red', 'green', 'blue']]
+            ],
+
+            [
                 'x.id IS NULL',
                 ['id' => ['IS_NULL' => 1]],
                 []
@@ -122,7 +128,19 @@ class DoctrineFilterTest extends TestCase
                 "x.serializedWithUnderscores = :doctrine_filter_serializedWithUnderscores_eq_0",
                 ["serialized_with_underscores" => ["eq" => 1]],
                 ['doctrine_filter_serializedWithUnderscores_eq_0' => 1]
-            ]
+            ],
+
+            [
+                "x.age >= :doctrine_filter_age_gte_0",
+                ["age" => ["gte" => 1]],
+                ['doctrine_filter_age_gte_0' => 1]
+            ],
+
+            [
+                "x.age <= :doctrine_filter_age_lte_0",
+                ["age" => ["lte" => 1]],
+                ['doctrine_filter_age_lte_0' => 1]
+            ],
         ];
     }
 
