@@ -8,12 +8,22 @@ use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 
 class DoctrineFilter
 {
+    /** @var QueryBuilder */
     private $queryBuilder;
+
+    /** @var int  */
     private $parameterIndex = 0;
+
+    /** @var string */
     private $rootAlias;
 
+    /** @var array<string, callable> */
     private $unaryOps;
+
+    /** @var array<string, BinaryFilterOperationDto> */
     private $binaryOps;
+
+    /** @var array<string, mixed> */
     private $ops;
 
     public function __construct(QueryBuilder $queryBuilder)
@@ -24,13 +34,22 @@ class DoctrineFilter
         $this->initializeOperations();
     }
 
-    public function applyFromQueryString($queryString, $exposedFields)
+    /**
+     * @param array<string, string> $exposedFields
+     * @throws InvalidFilterOperatorException
+     */
+    public function applyFromQueryString(string $queryString, array $exposedFields): void
     {
         parse_str($queryString, $res);
         $this->applyFromArray($res, $exposedFields);
     }
 
-    public function applyFromArray($filters, $exposedFields)
+    /**
+     * @param array<string, mixed> $filters
+     * @param array<string, string> $exposedFields
+     * @throws InvalidFilterOperatorException
+     */
+    public function applyFromArray(array $filters, array $exposedFields): void
     {
         if (isset($filters['orderBy'])) {
             $this->applySortingFromArray($filters['orderBy']);
@@ -39,7 +58,7 @@ class DoctrineFilter
         $this->applyFiltersFromArray($filters, $exposedFields);
     }
 
-    private function getRootAlias()
+    private function getRootAlias(): string
     {
         $aliases = $this->queryBuilder->getRootAliases();
 
@@ -50,7 +69,7 @@ class DoctrineFilter
         return $aliases[0];
     }
 
-    private function initializeOperations()
+    private function initializeOperations(): void
     {
         $this->binaryOps = [
             'gt' => new BinaryFilterOperationDto(function ($field, $val) {
@@ -116,19 +135,27 @@ class DoctrineFilter
         $this->ops = $this->binaryOps + $this->unaryOps;
     }
 
-    private function escapeLikeWildcards($search)
+    private function escapeLikeWildcards(string $search): string
     {
         return str_replace(['%', '_'], ['\\%', '\\_'], $search);
     }
 
-    private function applySortingFromArray($orderBy)
+    /**
+     * @param array<string, string> $orderBy
+     */
+    private function applySortingFromArray(array $orderBy): void
     {
         foreach ($orderBy as $field => $direction) {
             $this->queryBuilder->addOrderBy("{$this->rootAlias}.$field", strtolower($direction));
         }
     }
 
-    private function applyFiltersFromArray($filters, $exposedFields)
+    /**
+     * @param array<string, array<string, string>> $filters
+     * @param array<string, string> $exposedFields
+     * @throws InvalidFilterOperatorException
+     */
+    private function applyFiltersFromArray(array $filters, array $exposedFields): void
     {
         $this->parameterIndex = 0;
 
@@ -158,7 +185,7 @@ class DoctrineFilter
         }
     }
 
-    private function getNextParameterName($field, $operator)
+    private function getNextParameterName(string $field, string $operator): string
     {
         $paramName = "doctrine_filter_{$field}_{$operator}_{$this->parameterIndex}";
         $this->parameterIndex++;
@@ -166,7 +193,7 @@ class DoctrineFilter
         return $paramName;
     }
 
-    private function applyBinaryFilter(string $field, string $operator, $value)
+    private function applyBinaryFilter(string $field, string $operator, mixed $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
         $operation = $this->binaryOps[$operator];
@@ -177,7 +204,7 @@ class DoctrineFilter
             ->setParameter($paramName, $operation->getValue($value));
     }
 
-    private function applyUnaryFilter(string $field, string $operator)
+    private function applyUnaryFilter(string $field, string $operator): void
     {
         $this->queryBuilder->andWhere($this->unaryOps[$operator](sprintf("%s.%s", $this->rootAlias, $field)));
     }

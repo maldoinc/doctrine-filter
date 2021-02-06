@@ -7,6 +7,11 @@ use Maldoinc\Doctrine\Filter\Annotation\Expose;
 
 class ExposedFieldsReader
 {
+    /**
+     * @psalm-param class-string $class
+     * @psalm-return array<string, string>
+     * @return array
+     */
     public static function readExposedFields(string $class)
     {
         $result = [];
