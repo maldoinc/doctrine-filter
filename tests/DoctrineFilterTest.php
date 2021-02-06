@@ -68,7 +68,7 @@ class DoctrineFilterTest extends TestCase
             ],
 
             [
-                'x.tag IN (:doctrine_filter_tag_in_0)',
+                'x.tag IN(:doctrine_filter_tag_in_0)',
                 ['tag' => ['in' => ['red', 'green', 'blue']]],
                 ['doctrine_filter_tag_in_0' => ['red', 'green', 'blue']]
             ],
@@ -92,31 +92,31 @@ class DoctrineFilterTest extends TestCase
             ],
 
             [
-                'x.name != :doctrine_filter_name_neq_0',
+                'x.name <> :doctrine_filter_name_neq_0',
                 ['name' => ['neq' => 'Jimothy']],
                 ['doctrine_filter_name_neq_0' => 'Jimothy']
             ],
 
             [
-                "x.name like :doctrine_filter_name_contains_0",
+                "x.name LIKE :doctrine_filter_name_contains_0",
                 ['name' => ['contains' => 'a']],
                 ['doctrine_filter_name_contains_0' => '%a%']
             ],
 
             [
-                "x.name like :doctrine_filter_name_ends_with_0",
+                "x.name LIKE :doctrine_filter_name_ends_with_0",
                 ['name' => ['ends_with' => 'a']],
                 ['doctrine_filter_name_ends_with_0' => '%a']
             ],
 
             [
-                "x.name like :doctrine_filter_name_starts_with_0",
+                "x.name LIKE :doctrine_filter_name_starts_with_0",
                 ['name' => ['starts_with' => 'a']],
                 ['doctrine_filter_name_starts_with_0' => 'a%']
             ],
 
             [
-                "x.name like :doctrine_filter_name_starts_with_0",
+                "x.name LIKE :doctrine_filter_name_starts_with_0",
                 ['name' => ['starts_with' => '%']],
                 ['doctrine_filter_name_starts_with_0' => '\\%%']
             ],
