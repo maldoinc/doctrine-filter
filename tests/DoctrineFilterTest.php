@@ -14,6 +14,7 @@ use Doctrine\ORM\Tools\Setup;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
+use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
 use PHPUnit\Framework\TestCase;
 
 class DoctrineFilterTest extends TestCase
@@ -29,6 +30,14 @@ class DoctrineFilterTest extends TestCase
 
         $config->setMetadataDriverImpl($driver);
         $this->entityManager = EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);
+    }
+
+    private function createFilter(QueryBuilder $queryBuilder): DoctrineFilter
+    {
+        return new DoctrineFilter(
+            $queryBuilder,
+            ExposedFieldsReader::readExposedFields($queryBuilder->getRootEntities()[0])
+        );
     }
 
     private function isValidDql(QueryBuilder $queryBuilder): bool
@@ -147,7 +156,7 @@ class DoctrineFilterTest extends TestCase
     public function testNotExposedFields()
     {
         $qb = $this->createQueryBuilder();
-        $filter = new DoctrineFilter($qb);
+        $filter = $this->createFilter($qb);
 
         $filter->applyFromArray(['not_exposed' => ['gte' => 5]]);
         $this->assertEquals("SELECT x FROM App\Tests\Entity\TestEntity x", $qb->getQuery()->getDQL());
@@ -161,7 +170,7 @@ class DoctrineFilterTest extends TestCase
     {
         $qb = $this->createQueryBuilder();
 
-        (new DoctrineFilter($qb))->applyFromArray($array);
+        $this->createFilter($qb)->applyFromArray($array);
         $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x";
 
         if (count(array_keys($array)) > 0) {
@@ -183,13 +192,13 @@ class DoctrineFilterTest extends TestCase
     {
         $this->expectException(EmptyQueryBuilderException::class);
 
-        (new DoctrineFilter(new QueryBuilder($this->entityManager)))->applyFromArray([]);
+        (new DoctrineFilter(new QueryBuilder($this->entityManager), []))->applyFromArray([]);
     }
 
     public function testFromQueryStringIgnoreKeyValueFormat()
     {
         $qb = $this->createQueryBuilder();
-        (new DoctrineFilter($qb))->applyFromQueryString('ignored=this&age[gt]=50&this=that');
+        $this->createFilter($qb)->applyFromQueryString('ignored=this&age[gt]=50&this=that');
 
         $this->assertEquals(
             'SELECT x FROM App\Tests\Entity\TestEntity x WHERE x.age > :doctrine_filter_age_gt_0',
@@ -206,7 +215,7 @@ class DoctrineFilterTest extends TestCase
         $this->expectException(InvalidFilterOperatorException::class);
         $qb = $this->createQueryBuilder();
 
-        (new DoctrineFilter($qb))->applyFromQueryString('ignored=this&age[gt]=50&age[DUMMY]=yes');
+        $this->createFilter($qb)->applyFromQueryString('ignored=this&age[gt]=50&age[DUMMY]=yes');
     }
 
     public function orderByDataProvider(): array
@@ -225,7 +234,7 @@ class DoctrineFilterTest extends TestCase
     public function testOrderBy($orderByClause, $queryString)
     {
         $qb = $this->createQueryBuilder();
-        (new DoctrineFilter($qb))->applyFromQueryString($queryString);
+        $this->createFilter($qb)->applyFromQueryString($queryString);
 
         $dql = $queryString
             ? "SELECT x FROM App\Tests\Entity\TestEntity x ORDER BY $orderByClause"
