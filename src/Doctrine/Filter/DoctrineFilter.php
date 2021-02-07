@@ -3,6 +3,7 @@
 namespace Maldoinc\Doctrine\Filter;
 
 use Doctrine\ORM\QueryBuilder;
+use Maldoinc\Doctrine\Filter\Dto\BinaryFilterOperationDto;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 
@@ -11,7 +12,7 @@ class DoctrineFilter
     /** @var QueryBuilder */
     private $queryBuilder;
 
-    /** @var int  */
+    /** @var int */
     private $parameterIndex = 0;
 
     /** @var string */
@@ -40,28 +41,6 @@ class DoctrineFilter
         $this->exposedFields = ExposedFieldsReader::readExposedFields($this->queryBuilder->getRootEntities()[0]);
 
         $this->initializeOperations();
-    }
-
-    /**
-     * @throws InvalidFilterOperatorException
-     */
-    public function applyFromQueryString(string $queryString): void
-    {
-        parse_str($queryString, $res);
-        $this->applyFromArray($res);
-    }
-
-    /**
-     * @param array<string, mixed> $filters
-     * @throws InvalidFilterOperatorException
-     */
-    public function applyFromArray(array $filters): void
-    {
-        if (isset($filters['orderBy'])) {
-            $this->applySortingFromArray($filters['orderBy']);
-        }
-
-        $this->applyFiltersFromArray($filters);
     }
 
     private function getRootAlias(): string
@@ -147,6 +126,28 @@ class DoctrineFilter
     }
 
     /**
+     * @throws InvalidFilterOperatorException
+     */
+    public function applyFromQueryString(string $queryString): void
+    {
+        parse_str($queryString, $res);
+        $this->applyFromArray($res);
+    }
+
+    /**
+     * @param array<string, mixed> $filters
+     * @throws InvalidFilterOperatorException
+     */
+    public function applyFromArray(array $filters): void
+    {
+        if (isset($filters['orderBy'])) {
+            $this->applySortingFromArray($filters['orderBy']);
+        }
+
+        $this->applyFiltersFromArray($filters);
+    }
+
+    /**
      * @param array<string, string> $orderBy
      */
     private function applySortingFromArray(array $orderBy): void
@@ -190,14 +191,6 @@ class DoctrineFilter
         }
     }
 
-    private function getNextParameterName(string $field, string $operator): string
-    {
-        $paramName = "doctrine_filter_{$field}_{$operator}_{$this->parameterIndex}";
-        $this->parameterIndex++;
-
-        return $paramName;
-    }
-
     private function applyBinaryFilter(string $field, string $operator, mixed $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
@@ -207,6 +200,14 @@ class DoctrineFilter
         $this->queryBuilder
             ->andWhere($operation->getOperationResult($aliasedFieldName, ":$paramName"))
             ->setParameter($paramName, $operation->getValue($value));
+    }
+
+    private function getNextParameterName(string $field, string $operator): string
+    {
+        $paramName = "doctrine_filter_{$field}_{$operator}_{$this->parameterIndex}";
+        $this->parameterIndex++;
+
+        return $paramName;
     }
 
     private function applyUnaryFilter(string $field, string $operator): void

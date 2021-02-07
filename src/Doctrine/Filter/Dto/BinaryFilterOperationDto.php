@@ -1,6 +1,6 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter;
+namespace Maldoinc\Doctrine\Filter\Dto;
 
 class BinaryFilterOperationDto
 {
