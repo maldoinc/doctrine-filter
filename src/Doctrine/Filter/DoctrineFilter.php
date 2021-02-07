@@ -27,18 +27,17 @@ class DoctrineFilter
     /** @var array<string, mixed> */
     private $ops;
 
-    /**
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     private $exposedFields;
 
-    public function __construct(QueryBuilder $queryBuilder)
+    /**
+     * @phpstan-param array<string, string> $exposedFields
+     */
+    public function __construct(QueryBuilder $queryBuilder, array $exposedFields)
     {
         $this->queryBuilder = $queryBuilder;
         $this->rootAlias = $this->getRootAlias();
-        // By this point we are guaranteed to have a root entity as getRootAlias
-        // would have raised an exception
-        $this->exposedFields = ExposedFieldsReader::readExposedFields($this->queryBuilder->getRootEntities()[0]);
+        $this->exposedFields = $exposedFields;
 
         $this->initializeOperations();
     }
