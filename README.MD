@@ -91,14 +91,34 @@ This section will guide you with the implementation of this library into your pr
 create an instance of `DoctrineFilter` and apply it to your entity query builders before the query is executed.
 
 You can achieve that by using a service or implementing a method in a base controller which will filter the query
-builder. An example is given below.
+builder.
 
-### Example
+`DoctrineFilter` operates on the query builder using a whitelisted array of fields for the entities present in the
+query builder. The library provides the `@Expose` annotation to mark exposed fields as such and includes the
+`ExposedFieldsReader` class which is able to generate the whitelist from the query builder. The following example uses
+this method.
 
-#### Example Entity
+### Using the library without @Expose annotation.
+
+If using attributes is not appropriate for your project you are free to retreive the list of exposed fields in any
+fashion and simply pass them as an argument to the `DoctrineFilter` constructor.
+
+DoctrineFilter expects a dictionary for each entity containing a list of the exposed fields
 
 ```php
-<?php
+$fields = [
+    SomeEntity::class => [
+        'id' => 'id',
+        'public_serialized_name' => 'classFieldName',
+    ],
+    OtherEntity::class => ['id' => 'id', 'name' => 'name']
+]
+```
+
+### Complete implementation in a Symfony project
+
+#### 1. Annotate your entities with the `@Exposed` annotation
+```php
 # src/Entity/Book.php
 
 namespace App\Tests\Entity;
@@ -138,6 +158,7 @@ class User
 }
 ```
 
+#### 2. Create a service which accepts a query builder and applies filters from the current request
 ```php
 # src/Services/FilteredQueryBuilder.php
 
@@ -175,19 +196,15 @@ class FilteredQueryBuilder
         
         // Use the built-in reader based on the doctrine annotations reader.
         // You are free however to use something else if annotations are not appropriate for your project.
-        // DoctrineFilter expects a key-value array for each entity and the associated exposed fields. 
-        // $fields = [
-        //     SomeEntity::class => [
-        //         'serialized_name' => 'entityFieldName'
-        //     ],
-        //     OtherEntity::class => ['id' => 'id', 'name' => 'name']
-        // ]
         $fieldsReader = new ExposedFieldsReader($reader);
         
         $filter = new DoctrineFilter($queryBuilder, $fieldsReader->readExposedFields($queryBuilder));
         $filter->applyFromArray($this->requestStack->getCurrentRequest()->query->all());
         
-        // At this moment filtering is done. The rest of this function is provided for completeness sake.
+        // NOTE: At this moment filtering is done.
+        // The rest of this function is provided for completeness sake
+        
+        // Add pagination using pagerfanta
         $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
         $pagerfanta->setMaxPerPage($query->getInt('perPage', 10));
         $pagerfanta->setCurrentPage($query->getInt('page', 1));
@@ -205,6 +222,7 @@ class FilteredQueryBuilder
 }
 ```
 
+#### 3. Call service from your controllers
 ```php
 # src/Controller/BookController.php
 
