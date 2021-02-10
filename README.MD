@@ -117,7 +117,7 @@ $fields = [
 
 ### Complete implementation in a Symfony project
 
-#### 1. Annotate your entities with the `@Exposed` annotation
+#### 1. Annotate your entities with the `@Expose` annotation
 ```php
 # src/Entity/Book.php
 
@@ -186,7 +186,7 @@ class FilteredQueryBuilder
     {
         $query = $this->requestStack->getCurrentRequest()->query;
 
-        // Create a cached annotation reader in order to read the @Exposed annotations
+        // Create a cached annotation reader in order to read the @Expose annotations
         // from the entities appearing in the query builder
         $reader = new CachedReader(
             new AnnotationReader(),
