@@ -2,41 +2,24 @@
 
 namespace App\Tests;
 
-use App\Tests\Entity\TestEntity;
 use App\Tests\Entity\User;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Setup;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
-use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
+use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
-use PHPUnit\Framework\TestCase;
 
-class DoctrineFilterTest extends TestCase
+class DoctrineFilterTest extends BaseTestCase
 {
-    private $entityManager;
-
-    protected function setUp(): void
-    {
-        $config = Setup::createConfiguration(true);
-        $driver = new AnnotationDriver(new AnnotationReader(), [
-            __DIR__ . '/Entity'
-        ]);
-
-        $config->setMetadataDriverImpl($driver);
-        $this->entityManager = EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);
-    }
 
     private function createFilter(QueryBuilder $queryBuilder): DoctrineFilter
     {
         return new DoctrineFilter(
             $queryBuilder,
-            ExposedFieldsReader::readExposedFields($queryBuilder->getRootEntities()[0])
+            (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($queryBuilder)
         );
     }
 
@@ -46,14 +29,6 @@ class DoctrineFilterTest extends TestCase
         $parser->parse();
 
         return true;
-    }
-
-    private function createQueryBuilder(): QueryBuilder
-    {
-        $qb = new QueryBuilder($this->entityManager);
-        $qb->from(TestEntity::class, 'x')->select('x');
-
-        return $qb;
     }
 
     public function applyFromArrayDataProvider(): array
