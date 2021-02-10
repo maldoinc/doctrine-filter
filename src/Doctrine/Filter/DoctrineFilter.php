@@ -191,7 +191,10 @@ class DoctrineFilter
         }
     }
 
-    private function applyBinaryFilter(string $field, string $operator, mixed $value): void
+    /**
+     * @param mixed $value
+     */
+    private function applyBinaryFilter(string $field, string $operator, $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
         $operation = $this->binaryOps[$operator];
