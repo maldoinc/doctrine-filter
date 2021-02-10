@@ -68,10 +68,10 @@ format. Below is a complete list of the supported operators.
 | `ends_with`     | Ends with             | `email[ends_with]=@gmail.com`
 | `contains`      | Contains              | `name[containts]=d`
 
-### Ordering
+### Sorting
 
-Ordering is applied via the `orderBy` query string key, which also means that it is not a valid field name to use for
-ordering your data. Ordering is applied via the following syntax: `orderBy[fieldName]=direction` where direction can be
+Sorting is applied via the `orderBy` query string key, which also means that it is not a valid field name to use for
+ordering your data. It is applied via the following syntax: `orderBy[fieldName]=direction` where direction can be
 either `asc` or `desc`.
 
 The `orderBy` key can be used multiple times to allow sorting by multiple fields.
