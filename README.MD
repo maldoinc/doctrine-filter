@@ -195,10 +195,11 @@ class FilteredQueryBuilder
         );
         
         // Use the built-in reader based on the doctrine annotations reader.
-        // You are free however to use something else if annotations are not appropriate for your project.
-        $fieldsReader = new ExposedFieldsReader($reader);
+        // You are free however to use something else if annotations
+        // are not appropriate for your project.
+        $fieldReader = new ExposedFieldsReader($reader);
         
-        $filter = new DoctrineFilter($queryBuilder, $fieldsReader->readExposedFields($queryBuilder));
+        $filter = new DoctrineFilter($queryBuilder, $fieldReader->readExposedFields($queryBuilder));
         $filter->applyFromArray($this->requestStack->getCurrentRequest()->query->all());
         
         // NOTE: At this moment filtering is done.
@@ -231,9 +232,11 @@ class BookController extends Controller
     #[Route("/book")]
     public function getList(BookRepository $repository, FilteredQueryBuilder $filteredQueryBuilder)
     { 
-        // All that there's left to do is create a query builder based on the current resource entity being exposed
-        // and pass it to the service we just created.
-        return $filteredQueryBuilder->createEntityJsonResponse($repository->createQueryBuilder('b'));
+        // All that there's left to do is create a query builder based on the current
+        //resource or entity being exposed and pass it to the service we just created.
+        $qb = $repository->createQueryBuilder('b');
+        
+        return $filteredQueryBuilder->createEntityJsonResponse($qb);
     }
 }
 ```
