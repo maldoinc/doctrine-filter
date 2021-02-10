@@ -1,7 +1,7 @@
 # doctrine-filter
 
-Quickly add advanced filtering/searching and sorting capabilities to any resource in your APIs or Web apps
-that use Doctrine.
+Quickly add advanced filtering/searching and sorting capabilities to any resource in your APIs or Web apps that use
+Doctrine.
 
 <a href="https://travis-ci.com/github/maldoinc/doctrine-filter"><img src='https://api.travis-ci.com/maldoinc/doctrine-filter.svg?branch=master'  alt="Build status"/></a>
 
@@ -23,9 +23,6 @@ GET /products?price[gte]=100&price[lte]=200
 // Returns all users with a birthday after 1 Jan 2000
 GET /users?birthday[gte]=2000-01-01
 
-// Returns users with ids 1 or 2
-GET /users?id[in][]=1&id[in][]=2
-
 // Returns all users with an email ending with gmail.com
 GET /users?email[ends_with]=gmail.com
 
@@ -45,31 +42,15 @@ GET /todos?status[eq]=complete&page=1&perPage=10&orderBy[id]=desc
 This library allows you to apply filters to a Doctrine Query Builder instance based on the input from the query string,
 allowing your application or Api to implement a common filtering scheme for all the exposed resources.
 
-Note that this library provides only filtering of the Query Builder. 
-Those looking for pagination can use this library in conjunction with [BabDev/Pagerfanta](https://github.com/BabDev/Pagerfanta).
+Note that this library provides only filtering of the Query Builder. Those looking for pagination can use this library
+in conjunction with [BabDev/Pagerfanta](https://github.com/BabDev/Pagerfanta).
 
 ## Filtering and Sorting
 
-```php
-
-use Maldoinc\Doctrine\Filter\DoctrineFilter;
-
-... 
-
-// When using a framework such as Symfony you may use the Request class
-// The applyFromArray function is compatible with any request class
-// which internally parses the query string via php's parse_str method.
-DoctrineFilter::applyFromArray($qb, $request->query->all());
-
-// Additionally, you can also pass the query string directly
-// although the applyFromArray is the preferred method.
-DoctrineFilter::applyFromQueryString($qb, $_SERVER['QUERY_STRING']);
-```
-
 ### Filtering
 
-The clients need to send the request in PHP's own query string syntax which differs from the
-standard CGI query string format. Below is a complete list of the supported operators.
+The clients need to send the request in PHP's own query string syntax which differs from the standard CGI query string
+format. Below is a complete list of the supported operators.
 
 | Operator        | Description           | Example
 | --------------- | --------------------- | -----------------
@@ -89,9 +70,9 @@ standard CGI query string format. Below is a complete list of the supported oper
 
 ### Ordering
 
-Ordering is applied via the `orderBy` query string key, which also means that it is not a valid field name to use 
-for ordering your data. Ordering is applied via the following syntax: `orderBy[fieldName]=direction` where direction
-can be either `asc` or `desc`. 
+Ordering is applied via the `orderBy` query string key, which also means that it is not a valid field name to use for
+ordering your data. Ordering is applied via the following syntax: `orderBy[fieldName]=direction` where direction can be
+either `asc` or `desc`.
 
 The `orderBy` key can be used multiple times to allow sorting by multiple fields.
 E.g: `orderBy[id]=desc&orderBy[lastName]=asc`
@@ -104,33 +85,114 @@ The recommended way to install the library is via composer:
 composer require maldoinc/doctrine-filters
 ```
 
-## Usage in a controller
+## Guide
 
-You may wish to call this library in a base EntityRepository or Controller class to ensure that it is applied to all
-resources and avoiding code duplication. An example implementation on Symfony 5 may look as follows
+This section will guide you with the implementation of this library into your project. On the most basic level, you will
+create an instance of `DoctrineFilter` and apply it to your entity query builders before the query is executed.
+
+You can achieve that by using a service or implementing a method in a base controller which will filter the query
+builder. An example is given below.
+
+### Example
+
+#### Example Entity
 
 ```php
-abstract class ApiController extends Controller
+<?php
+# src/Entity/Book.php
+
+namespace App\Tests\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;
+
+/**
+ * @ORM\Entity
+ */
+class User
 {
-    #[Required]
-    public RequestStack $requestStack;
-    
     /**
-    * Filters, sorts and paginates the query builder from the query request parameters
-    * Using maldoinc/doctrine-filter for the filtering and sorting 
-    * and BabDev/Pagerfanta for pagination
-    */
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     * @FilterExpose
+     */
+    public $id;
+
+    /**
+     * @ORM\Column(name="name", type="string", length=255)
+     * @FilterExpose
+     */
+    public $name;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    public $notMappedForFiltering;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @FilterExpose(serializedName="published_at")
+     */
+    public $publishedAt;
+}
+```
+
+```php
+# src/Services/FilteredQueryBuilder.php
+
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Cache\FilesystemCache;
+use Doctrine\ORM\QueryBuilder;
+use Maldoinc\Doctrine\Filter\DoctrineFilter;
+use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
+use Pagerfanta\Doctrine\ORM\QueryAdapter;
+use Pagerfanta\Pagerfanta;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+
+class FilteredQueryBuilder
+{
+    public function __construct(private RequestStack $requestStack,
+                                private string $cacheDir,
+                                private bool $isDebug)
+    {
+    }
+
     public function createEntityJsonResponse(QueryBuilder $queryBuilder): JsonResponse
     {
         $query = $this->requestStack->getCurrentRequest()->query;
 
-        DoctrineFilter::applyFromArray($queryBuilder, $query->all());
-
+        // Create a cached annotation reader in order to read the @Exposed annotations
+        // from the entities appearing in the query builder
+        $reader = new CachedReader(
+            new AnnotationReader(),
+            new FilesystemCache($this->cacheDir),
+            $this->isDebug
+        );
+        
+        // Use the built-in reader based on the doctrine annotations reader.
+        // You are free however to use something else if annotations are not appropriate for your project.
+        // DoctrineFilter expects a key-value array for each entity and the associated exposed fields. 
+        // $fields = [
+        //     SomeEntity::class => [
+        //         'serialized_name' => 'entityFieldName'
+        //     ],
+        //     OtherEntity::class => ['id' => 'id', 'name' => 'name']
+        // ]
+        $fieldsReader = new ExposedFieldsReader($reader);
+        
+        $filter = new DoctrineFilter($queryBuilder, $fieldsReader->readExposedFields($queryBuilder));
+        $filter->applyFromArray($this->requestStack->getCurrentRequest()->query->all());
+        
+        // At this moment filtering is done. The rest of this function is provided for completeness sake.
         $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
         $pagerfanta->setMaxPerPage($query->getInt('perPage', 10));
         $pagerfanta->setCurrentPage($query->getInt('page', 1));
 
-        return $this->json([
+        return new JsonResponse([
             'data' => $pagerfanta->getCurrentPageResults(),
             'pagination' => [
                 'current_page' => $pagerfanta->getCurrentPage(),
@@ -141,14 +203,19 @@ abstract class ApiController extends Controller
         ]);
     }
 }
+```
 
+```php
+# src/Controller/BookController.php
 
-class UsersController extends ApiController
+class BookController extends Controller
 {
-    #[Route("/users")]
-    public function getUsers(UserRepository $userRepository)
+    #[Route("/book")]
+    public function getList(BookRepository $repository, FilteredQueryBuilder $filteredQueryBuilder)
     { 
-        return $this->createEntityJsonResponse($userRepository->createQueryBuilder('u'))
+        // All that there's left to do is create a query builder based on the current resource entity being exposed
+        // and pass it to the service we just created.
+        return $filteredQueryBuilder->createEntityJsonResponse($repository->createQueryBuilder('b'));
     }
 }
 ```
