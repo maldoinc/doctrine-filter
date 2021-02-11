@@ -129,7 +129,7 @@ use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;
 /**
  * @ORM\Entity
  */
-class User
+class Book
 {
     /**
      * @ORM\Id
@@ -159,8 +159,20 @@ class User
 ```
 
 #### 2. Create a service which accepts a query builder and applies filters from the current request
+
+```yaml
+# Service definition
+services:
+    App\Service\FilteredQueryBuilder:
+        arguments:
+            $cacheDir: "%kernel.cache_dir%"
+            $isDebug: "%kernel.debug%"
+```
+
 ```php
-# src/Services/FilteredQueryBuilder.php
+# src/Service/FilteredQueryBuilder.php
+
+namespace App\Service;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
@@ -168,10 +180,7 @@ use Doctrine\Common\Cache\FilesystemCache;
 use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Pagerfanta;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class FilteredQueryBuilder
@@ -184,41 +193,25 @@ class FilteredQueryBuilder
 
     public function createEntityJsonResponse(QueryBuilder $queryBuilder): JsonResponse
     {
-        $query = $this->requestStack->getCurrentRequest()->query;
-
         // Create a cached annotation reader in order to read the @Expose annotations
         // from the entities appearing in the query builder
         $reader = new CachedReader(
             new AnnotationReader(),
+            // Example uses Filesystem cache but feel free to adapt
+            // to any of the supported doctrine caching mechanisms
             new FilesystemCache($this->cacheDir),
             $this->isDebug
         );
-        
+
         // Use the built-in reader based on the doctrine annotations reader.
         // You are free however to use something else if annotations
         // are not appropriate for your project.
         $fieldReader = new ExposedFieldsReader($reader);
-        
+
         $filter = new DoctrineFilter($queryBuilder, $fieldReader->readExposedFields($queryBuilder));
         $filter->applyFromArray($this->requestStack->getCurrentRequest()->query->all());
-        
-        // NOTE: At this moment filtering is done.
-        // The rest of this function is provided for completeness sake
-        
-        // Add pagination using pagerfanta
-        $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
-        $pagerfanta->setMaxPerPage($query->getInt('perPage', 10));
-        $pagerfanta->setCurrentPage($query->getInt('page', 1));
 
-        return new JsonResponse([
-            'data' => $pagerfanta->getCurrentPageResults(),
-            'pagination' => [
-                'current_page' => $pagerfanta->getCurrentPage(),
-                'total_pages' => $pagerfanta->getNbPages(),
-                'per_page' => $pagerfanta->getMaxPerPage(),
-                'count' => $pagerfanta->getNbResults()
-            ]
-        ]);
+        return new JsonResponse(['data' => $queryBuilder->getQuery()->getResult()]);
     }
 }
 ```
@@ -234,6 +227,9 @@ class BookController extends Controller
     { 
         // All that there's left to do is create a query builder based on the current
         //resource or entity being exposed and pass it to the service we just created.
+        
+        // Create a new query builder or otherwise call a method that returns one
+        // from the entity repository
         $qb = $repository->createQueryBuilder('b');
         
         return $filteredQueryBuilder->createEntityJsonResponse($qb);
