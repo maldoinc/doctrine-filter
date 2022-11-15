@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Setup;
-use PHPStan\Testing\TestCase;
+use PHPUnit\Framework\TestCase;
 
 abstract class BaseTestCase extends TestCase
 {
