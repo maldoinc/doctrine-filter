@@ -3,9 +3,11 @@
 namespace Maldoinc\Doctrine\Filter;
 
 use Doctrine\ORM\QueryBuilder;
-use Maldoinc\Doctrine\Filter\Dto\BinaryFilterOperationDto;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
+use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
+use Maldoinc\Doctrine\Filter\Operations\BinaryFilterOperation;
+use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 
 class DoctrineFilter
 {
@@ -18,29 +20,24 @@ class DoctrineFilter
     /** @var string */
     private $rootAlias;
 
-    /** @var array<string, callable> */
-    private $unaryOps;
-
-    /** @var array<string, BinaryFilterOperationDto> */
-    private $binaryOps;
-
-    /** @var array<string, mixed> */
-    private $ops;
+    /** @var array<string, UnaryFilterOperation|BinaryFilterOperation> */
+    private $ops = [];
 
     /** @var array<class-string, array<string, string>> */
     private $exposedFields;
 
     /**
      * @phpstan-param array<class-string, array<string, string>> $exposedFields
+     * @param FilterExtensionInterface[] $extensions
      * @throws EmptyQueryBuilderException
      */
-    public function __construct(QueryBuilder $queryBuilder, array $exposedFields)
+    public function __construct(QueryBuilder $queryBuilder, array $exposedFields, array $extensions)
     {
         $this->queryBuilder = $queryBuilder;
         $this->rootAlias = $this->getRootAlias();
         $this->exposedFields = $exposedFields;
 
-        $this->initializeOperations();
+        $this->initializeOperations($extensions);
     }
 
     /**
@@ -79,75 +76,14 @@ class DoctrineFilter
         return $aliases[0];
     }
 
-    private function initializeOperations(): void
+    /**
+     * @param FilterExtensionInterface[] $extensions
+     */
+    private function initializeOperations(array $extensions): void
     {
-        $this->binaryOps = [
-            'gt' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->gt($field, $val);
-            }),
-
-            'gte' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->gte($field, $val);
-            }),
-
-            'eq' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->eq($field, $val);
-            }),
-
-            'neq' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->neq($field, $val);
-            }),
-
-            'lt' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->lt($field, $val);
-            }),
-
-            'lte' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->lte($field, $val);
-            }),
-
-            'in' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->in($field, $val);
-            }),
-
-            'not_in' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->notIn($field, $val);
-            }),
-
-            'starts_with' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->like($field, $val);
-            }, function ($value) {
-                return $this->escapeLikeWildcards($value) . '%';
-            }),
-
-            'contains' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->like($field, $val);
-            }, function ($value) {
-                return '%' . $this->escapeLikeWildcards($value) . '%';
-            }),
-
-            'ends_with' => new BinaryFilterOperationDto(function ($field, $val) {
-                return $this->queryBuilder->expr()->like($field, $val);
-            }, function ($value) {
-                return '%' . $this->escapeLikeWildcards($value);
-            }),
-        ];
-
-        $this->unaryOps = [
-            'is_null' => function ($field) {
-                return $this->queryBuilder->expr()->isNull($field);
-            },
-            'is_not_null' => function ($field) {
-                return $this->queryBuilder->expr()->isNotNull($field);
-            }
-        ];
-
-        $this->ops = $this->binaryOps + $this->unaryOps;
-    }
-
-    private function escapeLikeWildcards(string $search): string
-    {
-        return str_replace(['%', '_'], ['\\%', '\\_'], $search);
+        foreach ($extensions as $extension) {
+            $this->ops = array_merge($this->ops, $extension->getUnaryOperators(), $extension->getBinaryOperators());
+        }
     }
 
     /**
@@ -156,7 +92,7 @@ class DoctrineFilter
     private function applySortingFromArray(array $orderBy): void
     {
         foreach ($orderBy as $field => $direction) {
-            $this->queryBuilder->addOrderBy("{$this->rootAlias}.$field", strtolower($direction));
+            $this->queryBuilder->addOrderBy("$this->rootAlias.$field", strtolower($direction));
         }
     }
 
@@ -186,10 +122,12 @@ class DoctrineFilter
                     ));
                 }
 
-                if (in_array($operator, array_keys($this->binaryOps))) {
-                    $this->applyBinaryFilter($dqlField, $operator, $value);
-                } else {
-                    $this->applyUnaryFilter($dqlField, $operator);
+                $operation = $this->ops[$operator];
+
+                if ($operation instanceof BinaryFilterOperation) {
+                    $this->applyBinaryFilter($dqlField, $operator, $operation, $value);
+                } else if ($operation instanceof UnaryFilterOperation) {
+                    $this->applyUnaryFilter($dqlField, $operation);
                 }
             }
         }
@@ -198,10 +136,9 @@ class DoctrineFilter
     /**
      * @param mixed $value
      */
-    private function applyBinaryFilter(string $field, string $operator, $value): void
+    private function applyBinaryFilter(string $field, string $operator, BinaryFilterOperation $operation, $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
-        $operation = $this->binaryOps[$operator];
         $aliasedFieldName = sprintf("%s.%s", $this->rootAlias, $field);
 
         $this->queryBuilder
@@ -211,14 +148,14 @@ class DoctrineFilter
 
     private function getNextParameterName(string $field, string $operator): string
     {
-        $paramName = "doctrine_filter_{$field}_{$operator}_{$this->parameterIndex}";
+        $paramName = "doctrine_filter_{$field}_{$operator}_$this->parameterIndex";
         $this->parameterIndex++;
 
         return $paramName;
     }
 
-    private function applyUnaryFilter(string $field, string $operator): void
+    private function applyUnaryFilter(string $field, UnaryFilterOperation $operation): void
     {
-        $this->queryBuilder->andWhere($this->unaryOps[$operator](sprintf("%s.%s", $this->rootAlias, $field)));
+        $this->queryBuilder->andWhere($operation->getOperationResult(sprintf("%s.%s", $this->rootAlias, $field)));
     }
 }

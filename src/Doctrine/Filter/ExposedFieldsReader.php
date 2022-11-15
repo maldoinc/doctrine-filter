@@ -32,11 +32,11 @@ class ExposedFieldsReader
     }
 
     /**
-     * @psalm-param class-string $class
-     * @psalm-return array<string, string>
+     * @phpstan-param class-string $class
+     * @phpstan-return array<string, string>
      * @return array
      */
-    private function readFieldsFromClass(string $class)
+    private function readFieldsFromClass(string $class): array
     {
         $result = [];
         $reflectionClass = new \ReflectionClass($class);

@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use App\Tests\Entity\User;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\Parser;
@@ -11,6 +10,7 @@ use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
+use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
 
 class DoctrineFilterTest extends BaseTestCase
 {
@@ -19,7 +19,8 @@ class DoctrineFilterTest extends BaseTestCase
     {
         return new DoctrineFilter(
             $queryBuilder,
-            (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($queryBuilder)
+            (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($queryBuilder),
+            [new PresetFilters()]
         );
     }
 
@@ -167,7 +168,7 @@ class DoctrineFilterTest extends BaseTestCase
     {
         $this->expectException(EmptyQueryBuilderException::class);
 
-        (new DoctrineFilter(new QueryBuilder($this->entityManager), []))->applyFromArray([]);
+        (new DoctrineFilter(new QueryBuilder($this->entityManager), [], [new PresetFilters()]))->applyFromArray([]);
     }
 
     public function testFromQueryStringIgnoreKeyValueFormat()

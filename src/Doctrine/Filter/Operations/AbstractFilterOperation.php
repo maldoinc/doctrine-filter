@@ -1,11 +1,11 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter\Dto;
+namespace Maldoinc\Doctrine\Filter\Operations;
 
-class BinaryFilterOperationDto
+class AbstractFilterOperation
 {
     /** @var callable */
-    private $operationCallback;
+    protected $operationCallback;
 
     /** @var callable|null */
     private $valueTransformer;
@@ -14,18 +14,6 @@ class BinaryFilterOperationDto
     {
         $this->operationCallback = $operationCallback;
         $this->valueTransformer = $valueTransformer;
-    }
-
-    /**
-     * @param mixed $left
-     * @param mixed $right
-     * @return mixed
-     */
-    public function getOperationResult($left, $right)
-    {
-        $callback = $this->operationCallback;
-
-        return $callback($left, $right);
     }
 
     /**
