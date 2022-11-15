@@ -32,6 +32,7 @@ class DoctrineFilter
 
     /**
      * @phpstan-param array<class-string, array<string, string>> $exposedFields
+     * @throws EmptyQueryBuilderException
      */
     public function __construct(QueryBuilder $queryBuilder, array $exposedFields)
     {
@@ -64,6 +65,9 @@ class DoctrineFilter
         $this->applyFiltersFromArray($filters);
     }
 
+    /**
+     * @throws EmptyQueryBuilderException
+     */
     private function getRootAlias(): string
     {
         $aliases = $this->queryBuilder->getRootAliases();
