@@ -30,7 +30,7 @@ class PresetFilters implements FilterExtensionInterface
             }),
             self::IS_NOT_NULL => new UnaryFilterOperation(function ($field) {
                 return (new Expr())->isNotNull($field);
-            })
+            }),
         ];
     }
 
@@ -72,19 +72,19 @@ class PresetFilters implements FilterExtensionInterface
             self::STARTS_WITH => new BinaryFilterOperation(function ($field, $val) {
                 return (new Expr())->like($field, $val);
             }, function ($value) {
-                return $this->escapeLikeWildcards($value) . '%';
+                return $this->escapeLikeWildcards($value).'%';
             }),
 
             self::CONTAINS => new BinaryFilterOperation(function ($field, $val) {
                 return (new Expr())->like($field, $val);
             }, function ($value) {
-                return '%' . $this->escapeLikeWildcards($value) . '%';
+                return '%'.$this->escapeLikeWildcards($value).'%';
             }),
 
             self::ENDS_WITH => new BinaryFilterOperation(function ($field, $val) {
                 return (new Expr())->like($field, $val);
             }, function ($value) {
-                return '%' . $this->escapeLikeWildcards($value);
+                return '%'.$this->escapeLikeWildcards($value);
             }),
         ];
     }

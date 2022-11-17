@@ -16,6 +16,4 @@ interface FilterExtensionInterface
      * @return BinaryFilterOperation[]
      */
     public function getBinaryOperators(): array;
-
-
 }

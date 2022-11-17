@@ -28,7 +28,9 @@ class DoctrineFilter
 
     /**
      * @phpstan-param array<class-string, array<string, string>> $exposedFields
+     *
      * @param FilterExtensionInterface[] $extensions
+     *
      * @throws EmptyQueryBuilderException
      */
     public function __construct(QueryBuilder $queryBuilder, array $exposedFields, array $extensions)
@@ -51,6 +53,7 @@ class DoctrineFilter
 
     /**
      * @param array<string, mixed> $filters
+     *
      * @throws InvalidFilterOperatorException
      */
     public function applyFromArray(array $filters): void
@@ -98,6 +101,7 @@ class DoctrineFilter
 
     /**
      * @param array<string, array<string, string>> $filters
+     *
      * @throws InvalidFilterOperatorException
      */
     private function applyFiltersFromArray(array $filters): void
@@ -106,7 +110,7 @@ class DoctrineFilter
         $exposedFields = $this->exposedFields[$this->queryBuilder->getRootEntities()[0]];
 
         foreach ($filters as $field => $fieldFilters) {
-            if (!is_array($fieldFilters) || $field === 'orderBy' || !array_key_exists($field, $exposedFields)) {
+            if (!is_array($fieldFilters) || 'orderBy' === $field || !array_key_exists($field, $exposedFields)) {
                 continue;
             }
 
@@ -115,18 +119,14 @@ class DoctrineFilter
                 $dqlField = $exposedFields[$field];
 
                 if (!in_array($operator, array_keys($this->ops))) {
-                    throw new InvalidFilterOperatorException(sprintf(
-                        "Unknown operator %s. Supported values are %s",
-                        $operator,
-                        implode(', ', array_keys($this->ops))
-                    ));
+                    throw new InvalidFilterOperatorException(sprintf('Unknown operator %s. Supported values are %s', $operator, implode(', ', array_keys($this->ops))));
                 }
 
                 $operation = $this->ops[$operator];
 
                 if ($operation instanceof BinaryFilterOperation) {
                     $this->applyBinaryFilter($dqlField, $operator, $operation, $value);
-                } else if ($operation instanceof UnaryFilterOperation) {
+                } elseif ($operation instanceof UnaryFilterOperation) {
                     $this->applyUnaryFilter($dqlField, $operation);
                 }
             }
@@ -139,7 +139,7 @@ class DoctrineFilter
     private function applyBinaryFilter(string $field, string $operator, BinaryFilterOperation $operation, $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
-        $aliasedFieldName = sprintf("%s.%s", $this->rootAlias, $field);
+        $aliasedFieldName = sprintf('%s.%s', $this->rootAlias, $field);
 
         $this->queryBuilder
             ->andWhere($operation->getOperationResult($aliasedFieldName, ":$paramName"))
@@ -149,13 +149,13 @@ class DoctrineFilter
     private function getNextParameterName(string $field, string $operator): string
     {
         $paramName = "doctrine_filter_{$field}_{$operator}_$this->parameterIndex";
-        $this->parameterIndex++;
+        ++$this->parameterIndex;
 
         return $paramName;
     }
 
     private function applyUnaryFilter(string $field, UnaryFilterOperation $operation): void
     {
-        $this->queryBuilder->andWhere($operation->getOperationResult(sprintf("%s.%s", $this->rootAlias, $field)));
+        $this->queryBuilder->andWhere($operation->getOperationResult(sprintf('%s.%s', $this->rootAlias, $field)));
     }
 }

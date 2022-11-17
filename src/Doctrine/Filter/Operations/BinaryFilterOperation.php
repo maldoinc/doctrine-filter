@@ -7,6 +7,7 @@ class BinaryFilterOperation extends AbstractFilterOperation
     /**
      * @param mixed $operator
      * @param mixed $value
+     *
      * @return mixed
      */
     public function getOperationResult($operator, $value)
