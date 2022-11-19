@@ -8,7 +8,7 @@ class AbstractFilterOperation
     protected $operationCallback;
 
     /** @var callable|null */
-    private $valueTransformer;
+    protected $valueTransformer;
 
     public function __construct(callable $operationCallback, callable $valueTransformer = null)
     {
@@ -16,10 +16,4 @@ class AbstractFilterOperation
         $this->valueTransformer = $valueTransformer;
     }
 
-    public function getValue($value)
-    {
-        $transformer = $this->valueTransformer;
-
-        return is_callable($transformer) ? $transformer($value) : $value;
-    }
 }
