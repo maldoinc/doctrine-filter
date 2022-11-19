@@ -22,6 +22,22 @@ class PresetFilters implements FilterExtensionInterface
     public const CONTAINS = 'contains';
     public const ENDS_WITH = 'ends_with';
 
+    public const ALL_PRESETS = [
+        self::IS_NULL,
+        self::IS_NOT_NULL,
+        self::GT,
+        self::GTE,
+        self::EQ,
+        self::NEQ,
+        self::LT,
+        self::LTE,
+        self::IN,
+        self::NOT_IN,
+        self::STARTS_WITH,
+        self::CONTAINS,
+        self::ENDS_WITH
+    ];
+
     public function getUnaryOperators(): array
     {
         return [

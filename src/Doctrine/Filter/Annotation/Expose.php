@@ -10,4 +10,7 @@ class Expose
 {
     /** @var string */
     public $serializedName = null;
+
+    /** @var string[] */
+    public $operators = [];
 }

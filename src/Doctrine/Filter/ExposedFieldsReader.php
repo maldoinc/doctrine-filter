@@ -17,14 +17,14 @@ class ExposedFieldsReader
     }
 
     /**
-     * @phpstan-return array<class-string, array<string, string>>
+     * @phpstan-return array<class-string, array<string, ExposedField>>
      */
     public function readExposedFields(QueryBuilder $queryBuilder): array
     {
         $res = [];
 
-        /** @var class-string $entity */
         foreach ($queryBuilder->getRootEntities() as $entity) {
+            /** @var class-string $entity */
             $res[$entity] = $this->readFieldsFromClass($entity);
         }
 
@@ -33,7 +33,7 @@ class ExposedFieldsReader
 
     /**
      * @phpstan-param class-string $class
-     * @phpstan-return array<string, string>
+     * @phpstan-return array<string, ExposedField>
      */
     private function readFieldsFromClass(string $class): array
     {
@@ -46,7 +46,10 @@ class ExposedFieldsReader
             if ($exposeAnnotation instanceof Expose) {
                 $serializedName = $exposeAnnotation->serializedName ?: $reflectionProperty->getName();
 
-                $result[$serializedName] = $reflectionProperty->getName();
+                $result[$serializedName] = new ExposedField(
+                    $reflectionProperty->getName(),
+                    $exposeAnnotation->operators
+                );
             }
         }
 

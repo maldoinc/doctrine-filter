@@ -23,12 +23,11 @@ class DoctrineFilter
     /** @var array<string, UnaryFilterOperation|BinaryFilterOperation> */
     private $ops = [];
 
-    /** @var array<class-string, array<string, string>> */
+    /** @var array<class-string, array<string, ExposedField>> */
     private $exposedFields;
 
     /**
-     * @phpstan-param array<class-string, array<string, string>> $exposedFields
-     *
+     * @param array<class-string, array<string, ExposedField>> $exposedFields
      * @param FilterExtensionInterface[] $extensions
      *
      * @throws EmptyQueryBuilderException
@@ -116,18 +115,23 @@ class DoctrineFilter
 
             foreach ($fieldFilters as $operator => $value) {
                 $operator = strtolower($operator);
-                $dqlField = $exposedFields[$field];
+                $exposedField = $exposedFields[$field];
 
-                if (!in_array($operator, array_keys($this->ops))) {
-                    throw new InvalidFilterOperatorException(sprintf('Unknown operator %s. Supported values are %s', $operator, implode(', ', array_keys($this->ops))));
+                if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
+                    throw new InvalidFilterOperatorException(sprintf(
+                        'Unknown operator "%s". Supported values for field %s are: [%s]',
+                        $operator,
+                        $field,
+                        implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))
+                    ));
                 }
 
                 $operation = $this->ops[$operator];
 
                 if ($operation instanceof BinaryFilterOperation) {
-                    $this->applyBinaryFilter($dqlField, $operator, $operation, $value);
+                    $this->applyBinaryFilter($exposedField->getFieldName(), $operator, $operation, $value);
                 } elseif ($operation instanceof UnaryFilterOperation) {
-                    $this->applyUnaryFilter($dqlField, $operation);
+                    $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
                 }
             }
         }
