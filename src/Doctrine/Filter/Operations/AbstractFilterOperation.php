@@ -16,11 +16,6 @@ class AbstractFilterOperation
         $this->valueTransformer = $valueTransformer;
     }
 
-    /**
-     * @param mixed $value
-     *
-     * @return mixed
-     */
     public function getValue($value)
     {
         $transformer = $this->valueTransformer;

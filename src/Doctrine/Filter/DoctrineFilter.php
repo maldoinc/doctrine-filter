@@ -11,24 +11,21 @@ use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 
 class DoctrineFilter
 {
-    /** @var QueryBuilder */
-    private $queryBuilder;
+    private QueryBuilder $queryBuilder;
 
-    /** @var int */
-    private $parameterIndex = 0;
+    private int $parameterIndex = 0;
 
-    /** @var string */
-    private $rootAlias;
+    private string $rootAlias;
 
     /** @var array<string, UnaryFilterOperation|BinaryFilterOperation> */
-    private $ops = [];
+    private array $ops = [];
 
     /** @var array<class-string, array<string, ExposedField>> */
-    private $exposedFields;
+    private array $exposedFields;
 
     /**
      * @param array<class-string, array<string, ExposedField>> $exposedFields
-     * @param FilterExtensionInterface[] $extensions
+     * @param FilterExtensionInterface[]                       $extensions
      *
      * @throws EmptyQueryBuilderException
      */
@@ -118,12 +115,7 @@ class DoctrineFilter
                 $exposedField = $exposedFields[$field];
 
                 if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
-                    throw new InvalidFilterOperatorException(sprintf(
-                        'Unknown operator "%s". Supported values for field %s are: [%s]',
-                        $operator,
-                        $field,
-                        implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))
-                    ));
+                    throw new InvalidFilterOperatorException(sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $field, implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))));
                 }
 
                 $operation = $this->ops[$operator];
@@ -137,9 +129,6 @@ class DoctrineFilter
         }
     }
 
-    /**
-     * @param mixed $value
-     */
     private function applyBinaryFilter(string $field, string $operator, BinaryFilterOperation $operation, $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);

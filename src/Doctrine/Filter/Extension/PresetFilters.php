@@ -35,7 +35,7 @@ class PresetFilters implements FilterExtensionInterface
         self::NOT_IN,
         self::STARTS_WITH,
         self::CONTAINS,
-        self::ENDS_WITH
+        self::ENDS_WITH,
     ];
 
     public function getUnaryOperators(): array

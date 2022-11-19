@@ -8,9 +8,8 @@ namespace Maldoinc\Doctrine\Filter\Annotation;
  */
 class Expose
 {
-    /** @var string */
-    public $serializedName = null;
+    public ?string $serializedName = null;
 
     /** @var string[] */
-    public $operators = [];
+    public array $operators = [];
 }

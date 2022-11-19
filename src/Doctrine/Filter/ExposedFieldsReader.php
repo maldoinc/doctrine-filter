@@ -24,7 +24,7 @@ class ExposedFieldsReader
         $res = [];
 
         foreach ($queryBuilder->getRootEntities() as $entity) {
-            /** @var class-string $entity */
+            /* @var class-string $entity */
             $res[$entity] = $this->readFieldsFromClass($entity);
         }
 
