@@ -41,67 +41,39 @@ class PresetFilters implements FilterExtensionInterface
     public function getUnaryOperators(): array
     {
         return [
-            self::IS_NULL => new UnaryFilterOperation(function ($field) {
-                return (new Expr())->isNull($field);
-            }),
-            self::IS_NOT_NULL => new UnaryFilterOperation(function ($field) {
-                return (new Expr())->isNotNull($field);
-            }),
+            self::IS_NULL => new UnaryFilterOperation(fn ($field) => (new Expr())->isNull($field)),
+            self::IS_NOT_NULL => new UnaryFilterOperation(fn ($field) => (new Expr())->isNotNull($field)),
         ];
     }
 
     public function getBinaryOperators(): array
     {
+        $expr = new Expr();
+
         return [
-            self::GT => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->gt($field, $val);
-            }),
+            self::GT => new BinaryFilterOperation(fn ($field, $val) => $expr->gt($field, $val)),
+            self::GTE => new BinaryFilterOperation(fn ($field, $val) => $expr->gte($field, $val)),
+            self::EQ => new BinaryFilterOperation(fn ($field, $val) => $expr->eq($field, $val)),
+            self::NEQ => new BinaryFilterOperation(fn ($field, $val) => $expr->neq($field, $val)),
+            self::LT => new BinaryFilterOperation(fn ($field, $val) => $expr->lt($field, $val)),
+            self::LTE => new BinaryFilterOperation(fn ($field, $val) => $expr->lte($field, $val)),
+            self::IN => new BinaryFilterOperation(fn ($field, $val) => $expr->in($field, $val)),
+            self::NOT_IN => new BinaryFilterOperation(fn ($field, $val) => $expr->notIn($field, $val)),
 
-            self::GTE => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->gte($field, $val);
-            }),
+            self::STARTS_WITH => new BinaryFilterOperation(
+                fn ($field, $val) => $expr->like($field, $val),
+                fn ($value) => $this->escapeLikeWildcards($value) . '%'
+            ),
 
-            self::EQ => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->eq($field, $val);
-            }),
+            self::CONTAINS => new BinaryFilterOperation(
+                fn ($field, $val) => $expr->like($field, $val),
+                fn ($value) => '%' . $this->escapeLikeWildcards($value) . '%'
+            ),
 
-            self::NEQ => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->neq($field, $val);
-            }),
-
-            self::LT => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->lt($field, $val);
-            }),
-
-            self::LTE => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->lte($field, $val);
-            }),
-
-            self::IN => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->in($field, $val);
-            }),
-
-            self::NOT_IN => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->notIn($field, $val);
-            }),
-
-            self::STARTS_WITH => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->like($field, $val);
-            }, function ($value) {
-                return $this->escapeLikeWildcards($value).'%';
-            }),
-
-            self::CONTAINS => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->like($field, $val);
-            }, function ($value) {
-                return '%'.$this->escapeLikeWildcards($value).'%';
-            }),
-
-            self::ENDS_WITH => new BinaryFilterOperation(function ($field, $val) {
-                return (new Expr())->like($field, $val);
-            }, function ($value) {
-                return '%'.$this->escapeLikeWildcards($value);
-            }),
+            self::ENDS_WITH => new BinaryFilterOperation(
+                fn ($field, $val) => $expr->like($field, $val),
+                fn ($value) => '%' . $this->escapeLikeWildcards($value)
+            ),
         ];
     }
 

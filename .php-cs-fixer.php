@@ -9,5 +9,6 @@ return $config->setRules([
     '@Symfony' => true,
     'full_opening_tag' => false,
     'no_superfluous_phpdoc_tags' => true,
-    'no_unused_imports' => true
+    'no_unused_imports' => true,
+    'concat_space' => ['spacing' => 'one']
 ])->setFinder($finder);

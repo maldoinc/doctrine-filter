@@ -15,5 +15,4 @@ class AbstractFilterOperation
         $this->operationCallback = $operationCallback;
         $this->valueTransformer = $valueTransformer;
     }
-
 }
