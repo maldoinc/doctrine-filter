@@ -18,7 +18,7 @@ class ExposedFieldsReaderTest extends BaseTestCase
                 'name' => new ExposedField('name', PresetFilters::ALL_PRESETS),
                 'age' => new ExposedField('age', PresetFilters::ALL_PRESETS),
                 'tag' => new ExposedField('tag', PresetFilters::ALL_PRESETS),
-                'serialized_with_underscores' => new ExposedField('serializedWithUnderscores', PresetFilters::ALL_PRESETS)
+                'serialized_with_underscores' => new ExposedField('serializedWithUnderscores', PresetFilters::ALL_PRESETS),
             ]],
             (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($this->createQueryBuilder())
         );

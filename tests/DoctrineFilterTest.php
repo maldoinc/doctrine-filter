@@ -39,91 +39,91 @@ class DoctrineFilterTest extends BaseTestCase
             [
                 'x.age > :doctrine_filter_age_gt_0',
                 ['age' => ['gt' => 18]],
-                ['doctrine_filter_age_gt_0' => 18]
+                ['doctrine_filter_age_gt_0' => 18],
             ],
 
             [
                 'x.age > :doctrine_filter_age_gt_0 AND x.age < :doctrine_filter_age_lt_1',
                 ['age' => ['gt' => 18, 'lt' => 100]],
-                ['doctrine_filter_age_gt_0' => 18, 'doctrine_filter_age_lt_1' => 100]
+                ['doctrine_filter_age_gt_0' => 18, 'doctrine_filter_age_lt_1' => 100],
             ],
 
             [
                 'x.tag IN(:doctrine_filter_tag_in_0)',
                 ['tag' => ['in' => ['red', 'green', 'blue']]],
-                ['doctrine_filter_tag_in_0' => ['red', 'green', 'blue']]
+                ['doctrine_filter_tag_in_0' => ['red', 'green', 'blue']],
             ],
 
             [
                 'x.tag NOT IN(:doctrine_filter_tag_not_in_0)',
                 ['tag' => ['not_in' => ['red', 'green', 'blue']]],
-                ['doctrine_filter_tag_not_in_0' => ['red', 'green', 'blue']]
+                ['doctrine_filter_tag_not_in_0' => ['red', 'green', 'blue']],
             ],
 
             [
                 'x.id IS NULL',
                 ['id' => ['IS_NULL' => 1]],
-                []
+                [],
             ],
 
             [
                 'x.id IS NOT NULL',
                 ['id' => ['IS_NOT_NULL' => 1]],
-                []
+                [],
             ],
 
             [
                 'x.name = :doctrine_filter_name_eq_0',
                 ['name' => ['eq' => 'Jimothy']],
-                ['doctrine_filter_name_eq_0' => 'Jimothy']
+                ['doctrine_filter_name_eq_0' => 'Jimothy'],
             ],
 
             [
                 'x.name <> :doctrine_filter_name_neq_0',
                 ['name' => ['neq' => 'Jimothy']],
-                ['doctrine_filter_name_neq_0' => 'Jimothy']
+                ['doctrine_filter_name_neq_0' => 'Jimothy'],
             ],
 
             [
-                "x.name LIKE :doctrine_filter_name_contains_0",
+                'x.name LIKE :doctrine_filter_name_contains_0',
                 ['name' => ['contains' => 'a']],
-                ['doctrine_filter_name_contains_0' => '%a%']
+                ['doctrine_filter_name_contains_0' => '%a%'],
             ],
 
             [
-                "x.name LIKE :doctrine_filter_name_ends_with_0",
+                'x.name LIKE :doctrine_filter_name_ends_with_0',
                 ['name' => ['ends_with' => 'a']],
-                ['doctrine_filter_name_ends_with_0' => '%a']
+                ['doctrine_filter_name_ends_with_0' => '%a'],
             ],
 
             [
-                "x.name LIKE :doctrine_filter_name_starts_with_0",
+                'x.name LIKE :doctrine_filter_name_starts_with_0',
                 ['name' => ['starts_with' => 'a']],
-                ['doctrine_filter_name_starts_with_0' => 'a%']
+                ['doctrine_filter_name_starts_with_0' => 'a%'],
             ],
 
             [
-                "x.name LIKE :doctrine_filter_name_starts_with_0",
+                'x.name LIKE :doctrine_filter_name_starts_with_0',
                 ['name' => ['starts_with' => '%']],
-                ['doctrine_filter_name_starts_with_0' => '\\%%']
+                ['doctrine_filter_name_starts_with_0' => '\\%%'],
             ],
 
             [
-                "x.serializedWithUnderscores = :doctrine_filter_serializedWithUnderscores_eq_0",
-                ["serialized_with_underscores" => ["eq" => 1]],
-                ['doctrine_filter_serializedWithUnderscores_eq_0' => 1]
+                'x.serializedWithUnderscores = :doctrine_filter_serializedWithUnderscores_eq_0',
+                ['serialized_with_underscores' => ['eq' => 1]],
+                ['doctrine_filter_serializedWithUnderscores_eq_0' => 1],
             ],
 
             [
-                "x.age >= :doctrine_filter_age_gte_0",
-                ["age" => ["gte" => 1]],
-                ['doctrine_filter_age_gte_0' => 1]
+                'x.age >= :doctrine_filter_age_gte_0',
+                ['age' => ['gte' => 1]],
+                ['doctrine_filter_age_gte_0' => 1],
             ],
 
             [
-                "x.age <= :doctrine_filter_age_lte_0",
-                ["age" => ["lte" => 1]],
-                ['doctrine_filter_age_lte_0' => 1]
+                'x.age <= :doctrine_filter_age_lte_0',
+                ['age' => ['lte' => 1]],
+                ['doctrine_filter_age_lte_0' => 1],
             ],
         ];
     }
@@ -137,7 +137,6 @@ class DoctrineFilterTest extends BaseTestCase
         $this->assertEquals("SELECT x FROM App\Tests\Entity\TestEntity x", $qb->getQuery()->getDQL());
     }
 
-
     /**
      * @dataProvider applyFromArrayDataProvider
      */
@@ -149,10 +148,10 @@ class DoctrineFilterTest extends BaseTestCase
         $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x";
 
         if (count(array_keys($array)) > 0) {
-            $baseQuery .= " WHERE ";
+            $baseQuery .= ' WHERE ';
         }
 
-        $this->assertEquals($baseQuery . $filterQuery, $qb->getQuery()->getDQL());
+        $this->assertEquals($baseQuery.$filterQuery, $qb->getQuery()->getDQL());
 
         /** @var Parameter $parameter */
         foreach ($qb->getParameters() as $parameter) {

@@ -12,17 +12,15 @@ use PHPUnit\Framework\TestCase;
 
 abstract class BaseTestCase extends TestCase
 {
-    /** @var EntityManager  */
+    /** @var EntityManager */
     protected $entityManager;
 
     protected function setUp(): void
     {
         $config = Setup::createConfiguration(true);
-        $driver = new AnnotationDriver(new AnnotationReader(), [
-            __DIR__ . '/Entity'
-        ]);
-
+        $driver = new AnnotationDriver(new AnnotationReader(), [sprintf("%s/Entity", __DIR__)]);
         $config->setMetadataDriverImpl($driver);
+
         $this->entityManager = EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);
     }
 
@@ -33,5 +31,4 @@ abstract class BaseTestCase extends TestCase
 
         return $qb;
     }
-
 }
