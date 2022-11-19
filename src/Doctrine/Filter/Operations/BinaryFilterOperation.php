@@ -4,10 +4,10 @@ namespace Maldoinc\Doctrine\Filter\Operations;
 
 class BinaryFilterOperation extends AbstractFilterOperation
 {
-    public function getOperationResult($operator, $value)
+    public function getOperationResult(string $fieldName, string $parametrizedValue)
     {
         $callback = $this->operationCallback;
 
-        return $callback($operator, $value);
+        return $callback($fieldName, $parametrizedValue);
     }
 }
