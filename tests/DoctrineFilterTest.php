@@ -14,7 +14,6 @@ use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
 
 class DoctrineFilterTest extends BaseTestCase
 {
-
     private function createFilter(QueryBuilder $queryBuilder): DoctrineFilter
     {
         return new DoctrineFilter(
