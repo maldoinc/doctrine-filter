@@ -16,19 +16,19 @@ class TestEntity
      * @ORM\Column(type="integer")
      * @FilterExpose(operators=Maldoinc\Doctrine\Filter\Extension\PresetFilters::ALL_PRESETS)
      */
-    public $id;
+    public int $id;
 
     /**
      * @ORM\Column(name="name", type="string", length=255)
      * @FilterExpose(operators=Maldoinc\Doctrine\Filter\Extension\PresetFilters::ALL_PRESETS)
      */
-    public $name;
+    public string $name;
 
     /**
      * @ORM\Column(name="age", type="int")
      * @FilterExpose(operators=Maldoinc\Doctrine\Filter\Extension\PresetFilters::ALL_PRESETS)
      */
-    public $age;
+    public int $age;
 
     /**
      * @ORM\Column(type="json")
@@ -36,9 +36,9 @@ class TestEntity
      *
      * @var array<string>
      */
-    public $tag = [];
+    public array $tag = [];
 
-    public $notMappedForFiltering;
+    public int $notMappedForFiltering;
 
     /**
      * @ORM\Column(type="integer")
@@ -47,5 +47,5 @@ class TestEntity
      *     serializedName="serialized_with_underscores"
      * )
      */
-    public $serializedWithUnderscores;
+    public int $serializedWithUnderscores;
 }
