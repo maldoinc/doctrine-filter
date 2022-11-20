@@ -182,6 +182,7 @@ class DoctrineFilterTest extends BaseTestCase
     public function testInvalidOperators()
     {
         $this->expectException(InvalidFilterOperatorException::class);
+        $this->expectExceptionMessage('Unknown operator "DUMMY". Supported values for field age are: [');
         $qb = $this->createQueryBuilder();
 
         $this->createFilter($qb)->apply(ActionList::fromQueryString(
