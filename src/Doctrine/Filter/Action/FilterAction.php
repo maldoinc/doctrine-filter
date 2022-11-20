@@ -7,9 +7,12 @@ class FilterAction
     public string $publicFieldName;
     public string $operator;
 
-    /** @var mixed|null */
+    /** @var int|string|null */
     public $value;
 
+    /**
+     * @param int|string $value
+     */
     public function __construct(string $publicFieldName, string $operator, $value = null)
     {
         $this->publicFieldName = $publicFieldName;

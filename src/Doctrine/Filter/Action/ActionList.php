@@ -27,8 +27,11 @@ class ActionList
 
         parse_str($queryString, $res);
 
-        if (isset($res[$orderByKey]) && is_array($res[$orderByKey])) {
+        if ($orderByKey && isset($res[$orderByKey]) && is_array($res[$orderByKey])) {
             foreach ($res[$orderByKey] as $field => $direction) {
+                /**
+                 * @phpstan-ignore-next-line Phpstan gets confused about $field being an int
+                 */
                 $orderByActions[] = new OrderByAction($field, $direction);
             }
         }
@@ -36,6 +39,9 @@ class ActionList
         foreach ($res as $field => $fieldFilters) {
             if (is_array($fieldFilters)) {
                 foreach ($fieldFilters as $operator => $value) {
+                    /**
+                     * @phpstan-ignore-next-line Phpstan gets confused about $field being an int
+                     */
                     $filterActions[] = new FilterAction($field, $operator, $value);
                 }
             }

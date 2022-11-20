@@ -45,7 +45,7 @@ class DoctrineFilter
      * @throws InvalidFilterOperatorException
      * @throws EmptyQueryBuilderException
      */
-    public function apply(ActionList $actionSet)
+    public function apply(ActionList $actionSet): void
     {
         $this->applySorting($actionSet->getOrderByActions());
         $this->applyFilters($actionSet->getFilterActions());
@@ -121,6 +121,9 @@ class DoctrineFilter
         }
     }
 
+    /**
+     * @param mixed $value
+     */
     private function applyBinaryFilter(string $field, string $operator, BinaryFilterOperation $operation, $value): void
     {
         $paramName = $this->getNextParameterName($field, $operator);
