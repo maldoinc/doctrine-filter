@@ -3,6 +3,9 @@
 namespace Maldoinc\Doctrine\Filter;
 
 use Doctrine\ORM\QueryBuilder;
+use Maldoinc\Doctrine\Filter\Action\ActionList;
+use Maldoinc\Doctrine\Filter\Action\FilterAction;
+use Maldoinc\Doctrine\Filter\Action\OrderByAction;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
@@ -40,25 +43,12 @@ class DoctrineFilter
 
     /**
      * @throws InvalidFilterOperatorException
+     * @throws EmptyQueryBuilderException
      */
-    public function applyFromQueryString(string $queryString): void
+    public function apply(ActionList $actionSet)
     {
-        parse_str($queryString, $res);
-        $this->applyFromArray($res);
-    }
-
-    /**
-     * @param array<string, mixed> $filters
-     *
-     * @throws InvalidFilterOperatorException
-     */
-    public function applyFromArray(array $filters): void
-    {
-        if (isset($filters['orderBy'])) {
-            $this->applySortingFromArray($filters['orderBy']);
-        }
-
-        $this->applyFiltersFromArray($filters);
+        $this->applySorting($actionSet->getOrderByActions());
+        $this->applyFilters($actionSet->getFilterActions());
     }
 
     /**
@@ -86,45 +76,47 @@ class DoctrineFilter
     }
 
     /**
-     * @param array<string, string> $orderBy
+     * @param OrderByAction[] $orderBy ;
+     * @throws EmptyQueryBuilderException
      */
-    private function applySortingFromArray(array $orderBy): void
+    private function applySorting(array $orderBy): void
     {
-        foreach ($orderBy as $field => $direction) {
-            $this->queryBuilder->addOrderBy("$this->rootAlias.$field", strtolower($direction));
+        foreach ($orderBy as $value) {
+            $this->queryBuilder->addOrderBy(
+                sprintf('%s.%s', $this->getRootAlias(), $value->getField()),
+                $value->getDirection()
+            );
         }
     }
 
     /**
-     * @param array<string, array<string, string>> $filters
+     * @param FilterAction[] $filters
      *
      * @throws InvalidFilterOperatorException
      */
-    private function applyFiltersFromArray(array $filters): void
+    private function applyFilters(array $filters): void
     {
         $this->parameterIndex = 0;
         $exposedFields = $this->exposedFields[$this->queryBuilder->getRootEntities()[0]];
 
-        foreach ($filters as $field => $fieldFilters) {
-            if (!is_array($fieldFilters) || 'orderBy' === $field || !array_key_exists($field, $exposedFields)) {
+        foreach ($filters as $filterAction) {
+            if (!array_key_exists($filterAction->publicFieldName, $exposedFields)) {
                 continue;
             }
 
-            foreach ($fieldFilters as $operator => $value) {
-                $operator = strtolower($operator);
-                $exposedField = $exposedFields[$field];
+            $exposedField = $exposedFields[$filterAction->publicFieldName];
+            $operator = $filterAction->operator;
 
-                if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
-                    throw new InvalidFilterOperatorException(sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $field, implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))));
-                }
+            if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
+                throw new InvalidFilterOperatorException(sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $filterAction->publicFieldName, implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))));
+            }
 
-                $operation = $this->ops[$operator];
+            $operation = $this->ops[$operator];
 
-                if ($operation instanceof BinaryFilterOperation) {
-                    $this->applyBinaryFilter($exposedField->getFieldName(), $operator, $operation, $value);
-                } elseif ($operation instanceof UnaryFilterOperation) {
-                    $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
-                }
+            if ($operation instanceof BinaryFilterOperation) {
+                $this->applyBinaryFilter($exposedField->getFieldName(), $operator, $operation, $filterAction->value);
+            } elseif ($operation instanceof UnaryFilterOperation) {
+                $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
             }
         }
     }
