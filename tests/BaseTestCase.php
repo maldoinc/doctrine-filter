@@ -6,18 +6,17 @@ use App\Tests\Entity\TestEntity;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Setup;
 use PHPUnit\Framework\TestCase;
 
 abstract class BaseTestCase extends TestCase
 {
-    /** @var EntityManager */
-    protected $entityManager;
+    protected EntityManager $entityManager;
 
     protected function setUp(): void
     {
-        $config = Setup::createConfiguration(true);
+        $config = ORMSetup::createConfiguration(true);
         $driver = new AnnotationDriver(new AnnotationReader(), [sprintf("%s/Entity", __DIR__)]);
         $config->setMetadataDriverImpl($driver);
 
