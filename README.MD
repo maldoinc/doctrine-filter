@@ -49,8 +49,8 @@ in conjunction with [BabDev/Pagerfanta](https://github.com/BabDev/Pagerfanta).
 
 ### Filtering
 
-The clients need to send the request in PHP's own query string syntax which differs from the standard CGI query string
-format. Below is a complete list of the built-in operators. For custom operators refer to the documentation.
+Use any of the built-in filters described below or create custom filters which generate arbitrarily complex
+expressions and can be constrained on which entities it should be possible to execute them.
 
 | Operator      | Description           | Example                       |
 |---------------|-----------------------|-------------------------------|
