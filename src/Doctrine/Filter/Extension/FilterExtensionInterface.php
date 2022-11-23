@@ -8,12 +8,12 @@ use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 interface FilterExtensionInterface
 {
     /**
-     * @return UnaryFilterOperation[]
+     * @return array<string, UnaryFilterOperation>
      */
     public function getUnaryOperators(): array;
 
     /**
-     * @return BinaryFilterOperation[]
+     * @return array<string, BinaryFilterOperation>
      */
     public function getBinaryOperators(): array;
 }
