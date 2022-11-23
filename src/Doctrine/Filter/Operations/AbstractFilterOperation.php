@@ -14,8 +14,8 @@ class AbstractFilterOperation
     private $classMatcher;
 
     public function __construct(
-        callable  $operationCallback,
-        callable  $valueTransformer = null,
+        callable $operationCallback,
+        callable $valueTransformer = null,
         ?callable $classMatcher = null
     ) {
         $this->operationCallback = $operationCallback;
