@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use DeepCopy\Filter\Filter;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\Parser;
@@ -11,12 +12,17 @@ use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
+use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
 use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
+use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
 use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class DoctrineFilterTest extends BaseTestCase
 {
+    /**
+     * @return \Generator<DoctrineFilter>
+     */
     private function getFilters(): \Generator
     {
         $qb = $this->createQueryBuilder();
@@ -229,5 +235,36 @@ class DoctrineFilterTest extends BaseTestCase
             $this->assertEquals($dql, $filter->getQueryBuilder()->getQuery()->getDQL());
             $this->isValidDql($filter->getQueryBuilder());
         }
+    }
+
+    public function testCustomFilterClassMatcher()
+    {
+        $this->expectException(InvalidFilterOperatorException::class);
+        $this->expectExceptionMessage('Operator "is_dummy" not supported for this resource');
+
+        $customFilterWithClassMatcher = new class implements FilterExtensionInterface {
+            public function getUnaryOperators(): array
+            {
+                return [
+                    'is_dummy' => new UnaryFilterOperation(function () {
+                        throw new \Exception("Should not be here");
+                    }, null, function () {
+                        return false;
+                    })
+                ];
+            }
+
+            public function getBinaryOperators(): array
+            {
+                return [];
+            }
+        };
+
+        $qb = $this->createQueryBuilder();
+        $exposedFieldsReader = new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader()));
+        $filter = new DoctrineFilter($qb, $exposedFieldsReader->readExposedFields($qb), [$customFilterWithClassMatcher]);
+
+        $filter->apply(ActionList::fromQueryString("dummyField[is_dummy]"));
+
     }
 }

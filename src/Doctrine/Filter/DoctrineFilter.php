@@ -98,7 +98,10 @@ class DoctrineFilter
     private function applyFilters(array $filters): void
     {
         $this->parameterIndex = 0;
-        $exposedFields = $this->exposedFields[$this->queryBuilder->getRootEntities()[0]];
+
+        /** @var class-string $rootEntity */
+        $rootEntity = $this->queryBuilder->getRootEntities()[0];
+        $exposedFields = $this->exposedFields[$rootEntity];
 
         foreach ($filters as $filterAction) {
             if (!array_key_exists($filterAction->publicFieldName, $exposedFields)) {
@@ -124,6 +127,10 @@ class DoctrineFilter
             }
 
             $operation = $this->ops[$operator];
+
+            if (!$operation->supports($rootEntity)) {
+                throw new InvalidFilterOperatorException(sprintf('Operator "%s" not supported for this resource', $operator));
+            }
 
             if ($operation instanceof BinaryFilterOperation) {
                 $this->applyBinaryFilter($exposedField->getFieldName(), $operator, $operation, $filterAction->value);

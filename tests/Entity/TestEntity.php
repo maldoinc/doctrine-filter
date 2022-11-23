@@ -51,6 +51,13 @@ class TestEntity
     public int $notMappedForFiltering;
 
     /**
+     * @ORM\Column
+     * @FilterExpose(operators={"is_dummy"})
+     */
+    #[FilterExpose(operators: ["is_dummy"])]
+    public int $dummyField;
+
+    /**
      * @ORM\Column(type="integer")
      * @FilterExpose(
      *     operators=Maldoinc\Doctrine\Filter\Extension\PresetFilters::ALL_PRESETS,
