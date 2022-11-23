@@ -28,7 +28,7 @@ class DoctrineFilter
 
     /**
      * @param array<class-string, array<string, ExposedField>> $exposedFields
-     * @param FilterExtensionInterface[]                       $extensions
+     * @param FilterExtensionInterface[] $extensions
      *
      * @throws EmptyQueryBuilderException
      */
@@ -77,6 +77,7 @@ class DoctrineFilter
 
     /**
      * @param OrderByAction[] $orderBy ;
+     *
      * @throws EmptyQueryBuilderException
      */
     private function applySorting(array $orderBy): void
@@ -108,7 +109,18 @@ class DoctrineFilter
             $operator = $filterAction->operator;
 
             if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
-                throw new InvalidFilterOperatorException(sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $filterAction->publicFieldName, implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()))));
+                $supportedFields = implode(
+                    ', ',
+                    array_intersect(array_keys($this->ops), $exposedField->getOperators())
+                );
+
+                $message = sprintf('Unknown operator "%s". Supported values for field %s are: [%s]',
+                    $operator,
+                    $filterAction->publicFieldName,
+                    $supportedFields
+                );
+
+                throw new InvalidFilterOperatorException($message);
             }
 
             $operation = $this->ops[$operator];
@@ -145,5 +157,10 @@ class DoctrineFilter
     private function applyUnaryFilter(string $field, UnaryFilterOperation $operation): void
     {
         $this->queryBuilder->andWhere($operation->getOperationResult(sprintf('%s.%s', $this->rootAlias, $field)));
+    }
+
+    public function getQueryBuilder(): QueryBuilder
+    {
+        return $this->queryBuilder;
     }
 }

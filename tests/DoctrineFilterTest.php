@@ -12,16 +12,29 @@ use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
 use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
+use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class DoctrineFilterTest extends BaseTestCase
 {
-    private function createFilter(QueryBuilder $queryBuilder): DoctrineFilter
+    private function getFilters(): \Generator
     {
-        return new DoctrineFilter(
-            $queryBuilder,
-            (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($queryBuilder),
+        $qb = $this->createQueryBuilder();
+        yield new DoctrineFilter(
+            $qb,
+            (new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader())))->readExposedFields($qb),
             [new PresetFilters()]
         );
+
+        if (PHP_MAJOR_VERSION >= 8) {
+            $qb8 = $this->createQueryBuilder();
+
+            yield new DoctrineFilter(
+                $qb8,
+                (new ExposedFieldsReader(new NativeAttributeReader()))->readExposedFields($qb8),
+                [new PresetFilters()]
+            );
+        }
     }
 
     private function isValidDql(QueryBuilder $queryBuilder): bool
@@ -129,11 +142,10 @@ class DoctrineFilterTest extends BaseTestCase
 
     public function testNotExposedOrUknownFields()
     {
-        $qb = $this->createQueryBuilder();
-        $filter = $this->createFilter($qb);
-
-        $filter->apply(ActionList::fromQueryString('not_exposed[gte]=5&unknown_field[yes]=no&hello=world'));
-        $this->assertEquals("SELECT x FROM App\Tests\Entity\TestEntity x", $qb->getQuery()->getDQL());
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString('not_exposed[gte]=5&unknown_field[yes]=no&hello=world'));
+            $this->assertEquals("SELECT x FROM App\Tests\Entity\TestEntity x", $filter->getQueryBuilder()->getQuery()->getDQL());
+        }
     }
 
     /**
@@ -141,20 +153,20 @@ class DoctrineFilterTest extends BaseTestCase
      */
     public function testApplyFromQueryStringKnownFields($filterQuery, $queryString, $parameters)
     {
-        $qb = $this->createQueryBuilder();
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString($queryString));
+            $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x WHERE ";
 
-        $this->createFilter($qb)->apply(ActionList::fromQueryString($queryString));
-        $baseQuery = "SELECT x FROM App\Tests\Entity\TestEntity x WHERE ";
+            $this->assertEquals($baseQuery . $filterQuery, $filter->getQueryBuilder()->getQuery()->getDQL());
 
-        $this->assertEquals($baseQuery.$filterQuery, $qb->getQuery()->getDQL());
+            /** @var Parameter $parameter */
+            foreach ($filter->getQueryBuilder()->getParameters() as $parameter) {
+                $this->assertArrayHasKey($parameter->getName(), $parameters);
+                $this->assertEquals($parameters[$parameter->getName()], $parameter->getValue());
+            }
 
-        /** @var Parameter $parameter */
-        foreach ($qb->getParameters() as $parameter) {
-            $this->assertArrayHasKey($parameter->getName(), $parameters);
-            $this->assertEquals($parameters[$parameter->getName()], $parameter->getValue());
+            $this->assertTrue($this->isValidDql($filter->getQueryBuilder()));
         }
-
-        $this->assertTrue($this->isValidDql($qb));
     }
 
     public function testNoRootAlias()
@@ -166,28 +178,29 @@ class DoctrineFilterTest extends BaseTestCase
 
     public function testFromQueryStringIgnoreKeyValueFormat()
     {
-        $qb = $this->createQueryBuilder();
-        $this->createFilter($qb)->apply(ActionList::fromQueryString('ignored=this&age[gt]=50&this=that'));
+        foreach ($this->getFilters() as $filter) {
+            $qb = $filter->getQueryBuilder();
+            $filter->apply(ActionList::fromQueryString('ignored=this&age[gt]=50&this=that'));
 
-        $this->assertEquals(
-            'SELECT x FROM App\Tests\Entity\TestEntity x WHERE x.age > :doctrine_filter_age_gt_0',
-            $qb->getQuery()->getDQL()
-        );
-        $this->assertEquals(1, $qb->getParameters()->count());
-        $this->assertEquals('doctrine_filter_age_gt_0', $qb->getParameters()->first()->getName());
-        $this->assertEquals(50, $qb->getParameters()->first()->getValue());
-        $this->assertTrue($this->isValidDql($qb));
+            $this->assertEquals(
+                'SELECT x FROM App\Tests\Entity\TestEntity x WHERE x.age > :doctrine_filter_age_gt_0',
+                $qb->getQuery()->getDQL()
+            );
+            $this->assertEquals(1, $qb->getParameters()->count());
+            $this->assertEquals('doctrine_filter_age_gt_0', $qb->getParameters()->first()->getName());
+            $this->assertEquals(50, $qb->getParameters()->first()->getValue());
+            $this->assertTrue($this->isValidDql($qb));
+        }
     }
 
     public function testInvalidOperators()
     {
         $this->expectException(InvalidFilterOperatorException::class);
         $this->expectExceptionMessage('Unknown operator "DUMMY". Supported values for field age are: [');
-        $qb = $this->createQueryBuilder();
 
-        $this->createFilter($qb)->apply(ActionList::fromQueryString(
-            'ignored=this&age[gt]=50&age[DUMMY]=yes'
-        ));
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString('ignored=this&age[gt]=50&age[DUMMY]=yes'));
+        }
     }
 
     public function orderByDataProvider(): array
@@ -206,14 +219,15 @@ class DoctrineFilterTest extends BaseTestCase
      */
     public function testOrderBy($orderByClause, $queryString)
     {
-        $qb = $this->createQueryBuilder();
-        $this->createFilter($qb)->apply(ActionList::fromQueryString($queryString, 'orderBy'));
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString($queryString, 'orderBy'));
 
-        $dql = $orderByClause
-            ? "SELECT x FROM App\Tests\Entity\TestEntity x ORDER BY $orderByClause"
-            : "SELECT x FROM App\Tests\Entity\TestEntity x";
+            $dql = $orderByClause
+                ? "SELECT x FROM App\Tests\Entity\TestEntity x ORDER BY $orderByClause"
+                : "SELECT x FROM App\Tests\Entity\TestEntity x";
 
-        $this->assertEquals($dql, $qb->getQuery()->getDQL());
-        $this->isValidDql($qb);
+            $this->assertEquals($dql, $filter->getQueryBuilder()->getQuery()->getDQL());
+            $this->isValidDql($filter->getQueryBuilder());
+        }
     }
 }

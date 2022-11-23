@@ -7,11 +7,27 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Maldoinc\Doctrine\Filter\ExposedField;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
 use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReaderInterface;
+use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class ExposedFieldsReaderTest extends BaseTestCase
 {
-    public function testReader()
+    public function readerDataProvider(): \Generator
     {
+        yield [new DoctrineAnnotationReader(new AnnotationReader())];
+
+        if (PHP_MAJOR_VERSION >= 8) {
+            yield [new NativeAttributeReader()];
+        }
+    }
+
+    /**
+     * @dataProvider readerDataProvider
+     */
+    public function testReader(AttributeReaderInterface $reader)
+    {
+        $qb = $this->createQueryBuilder();
         $this->assertEquals(
             [TestEntity::class => [
                 'id' => new ExposedField('id', PresetFilters::ALL_PRESETS),
@@ -20,7 +36,7 @@ class ExposedFieldsReaderTest extends BaseTestCase
                 'tag' => new ExposedField('tag', PresetFilters::ALL_PRESETS),
                 'serialized_with_underscores' => new ExposedField('serializedWithUnderscores', PresetFilters::ALL_PRESETS),
             ]],
-            (new ExposedFieldsReader(new AnnotationReader()))->readExposedFields($this->createQueryBuilder())
+            (new ExposedFieldsReader($reader))->readExposedFields($qb)
         );
     }
 }

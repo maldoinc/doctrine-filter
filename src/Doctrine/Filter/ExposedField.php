@@ -4,11 +4,10 @@ namespace Maldoinc\Doctrine\Filter;
 
 class ExposedField
 {
-    /** @var string */
-    private $fieldName;
+    private string $fieldName;
 
     /** @var string[] */
-    private $operators;
+    private array $operators;
 
     /**
      * @param string[] $operators

@@ -2,16 +2,15 @@
 
 namespace Maldoinc\Doctrine\Filter;
 
-use Doctrine\Common\Annotations\Reader;
 use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\Annotation\Expose;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReaderInterface;
 
 class ExposedFieldsReader
 {
-    /** @var Reader */
-    private $reader;
+    private AttributeReaderInterface $reader;
 
-    public function __construct(Reader $reader)
+    public function __construct(AttributeReaderInterface $reader)
     {
         $this->reader = $reader;
     }
@@ -35,6 +34,8 @@ class ExposedFieldsReader
     /**
      * @phpstan-param class-string $class
      * @phpstan-return array<string, ExposedField>
+     *
+     * @throws \Exception
      */
     private function readFieldsFromClass(string $class): array
     {
@@ -42,15 +43,17 @@ class ExposedFieldsReader
         $reflectionClass = new \ReflectionClass($class);
 
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            $exposeAnnotation = $this->reader->getPropertyAnnotation($reflectionProperty, Expose::class);
+            $allAttributes = $this->reader->getAttributes($reflectionProperty, Expose::class);
 
-            if ($exposeAnnotation instanceof Expose) {
-                $serializedName = $exposeAnnotation->serializedName ?: $reflectionProperty->getName();
+            if (count($allAttributes) > 1) {
+                throw new \Exception(sprintf('Property %s::%s cannot have multiple %s attributes', $class, $reflectionProperty->getName(), Expose::class));
+            }
 
-                $result[$serializedName] = new ExposedField(
-                    $reflectionProperty->getName(),
-                    $exposeAnnotation->operators
-                );
+            $attr = current($allAttributes);
+            if ($attr instanceof Expose) {
+                $serializedName = $attr->serializedName ?: $reflectionProperty->getName();
+
+                $result[$serializedName] = new ExposedField($reflectionProperty->getName(), $attr->operators);
             }
         }
 

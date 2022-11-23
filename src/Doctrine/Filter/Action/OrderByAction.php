@@ -7,7 +7,8 @@ class OrderByAction
     private string $field;
     private string $direction;
 
-    public function __construct(string $field, string $direction) {
+    public function __construct(string $field, string $direction)
+    {
         $this->field = $field;
         $this->direction = $direction;
     }
