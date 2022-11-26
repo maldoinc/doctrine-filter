@@ -45,10 +45,10 @@ class DoctrineFilter
      * @throws InvalidFilterOperatorException
      * @throws EmptyQueryBuilderException
      */
-    public function apply(ActionList $actionSet): void
+    public function apply(ActionList $actions): void
     {
-        $this->applySorting($actionSet->getOrderByActions());
-        $this->applyFilters($actionSet->getFilterActions());
+        $this->applySorting($actions->getOrderByActions());
+        $this->applyFilters($actions->getFilterActions());
     }
 
     /**
