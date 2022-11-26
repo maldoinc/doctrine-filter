@@ -9,6 +9,7 @@ use Maldoinc\Doctrine\Filter\Action\OrderByAction;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
+use Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\BinaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 
@@ -20,7 +21,7 @@ class DoctrineFilter
 
     private string $rootAlias;
 
-    /** @var array<string, UnaryFilterOperation|BinaryFilterOperation> */
+    /** @var array<string, AbstractFilterOperation> */
     private array $ops = [];
 
     /** @var array<class-string, array<string, ExposedField>> */
@@ -71,7 +72,7 @@ class DoctrineFilter
     private function initializeOperations(array $extensions): void
     {
         foreach ($extensions as $extension) {
-            $this->ops = array_merge($this->ops, $extension->getUnaryOperators(), $extension->getBinaryOperators());
+            $this->ops = array_merge($this->ops, $extension->getOperators());
         }
     }
 

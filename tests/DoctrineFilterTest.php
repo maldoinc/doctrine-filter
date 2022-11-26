@@ -243,7 +243,7 @@ class DoctrineFilterTest extends BaseTestCase
         $this->expectExceptionMessage('Operator "is_dummy" not supported for this resource');
 
         $customFilterWithClassMatcher = new class implements FilterExtensionInterface {
-            public function getUnaryOperators(): array
+            public function getOperators(): array
             {
                 return [
                     'is_dummy' => new UnaryFilterOperation(function () {
@@ -252,11 +252,6 @@ class DoctrineFilterTest extends BaseTestCase
                         return false;
                     })
                 ];
-            }
-
-            public function getBinaryOperators(): array
-            {
-                return [];
             }
         };
 
