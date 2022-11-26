@@ -11,5 +11,5 @@ interface AttributeReaderInterface
      *
      * @return T[]
      */
-    public function getAttributes(\ReflectionProperty $reflectionProperty, string $attributeClass): array;
+    public function getPropertyAttributes(\ReflectionProperty $reflectionProperty, string $attributeClass): array;
 }

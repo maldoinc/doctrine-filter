@@ -43,7 +43,7 @@ class ExposedFieldsReader
         $reflectionClass = new \ReflectionClass($class);
 
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            $allAttributes = $this->reader->getAttributes($reflectionProperty, Expose::class);
+            $allAttributes = $this->reader->getPropertyAttributes($reflectionProperty, Expose::class);
 
             if (count($allAttributes) > 1) {
                 throw new \Exception(sprintf('Property %s::%s cannot have multiple %s attributes', $class, $reflectionProperty->getName(), Expose::class));

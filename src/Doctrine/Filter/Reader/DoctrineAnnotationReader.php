@@ -13,7 +13,7 @@ class DoctrineAnnotationReader implements AttributeReaderInterface
         $this->reader = $reader;
     }
 
-    public function getAttributes(\ReflectionProperty $reflectionProperty, string $attributeClass): array
+    public function getPropertyAttributes(\ReflectionProperty $reflectionProperty, string $attributeClass): array
     {
         $attribute = $this->reader->getPropertyAnnotation($reflectionProperty, $attributeClass);
 
