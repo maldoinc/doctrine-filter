@@ -11,5 +11,9 @@ return $config->setRules([
     'no_superfluous_phpdoc_tags' => ['allow_mixed' => true], // allow for phpstan
     'no_unused_imports' => true,
     'phpdoc_align' => ['align' => 'left'],
-    'concat_space' => ['spacing' => 'one']
+    'concat_space' => ['spacing' => 'one'],
+    'method_argument_space' => [
+        'on_multiline' => 'ensure_fully_multiline'
+    ],
+    'phpdoc_summary' => true,
 ])->setFinder($finder);

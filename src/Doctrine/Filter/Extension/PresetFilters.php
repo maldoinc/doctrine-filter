@@ -60,20 +60,11 @@ class PresetFilters implements FilterExtensionInterface
             self::IN => new BinaryFilterOperation(fn ($field, $val) => $expr->in($field, $val)),
             self::NOT_IN => new BinaryFilterOperation(fn ($field, $val) => $expr->notIn($field, $val)),
 
-            self::STARTS_WITH => new BinaryFilterOperation(
-                fn ($field, $val) => $expr->like($field, $val),
-                fn ($value) => $this->escapeLikeWildcards($value) . '%'
-            ),
+            self::STARTS_WITH => new BinaryFilterOperation(fn ($field, $val) => $expr->like($field, $val), fn ($value) => $this->escapeLikeWildcards($value) . '%'),
 
-            self::CONTAINS => new BinaryFilterOperation(
-                fn ($field, $val) => $expr->like($field, $val),
-                fn ($value) => '%' . $this->escapeLikeWildcards($value) . '%'
-            ),
+            self::CONTAINS => new BinaryFilterOperation(fn ($field, $val) => $expr->like($field, $val), fn ($value) => '%' . $this->escapeLikeWildcards($value) . '%'),
 
-            self::ENDS_WITH => new BinaryFilterOperation(
-                fn ($field, $val) => $expr->like($field, $val),
-                fn ($value) => '%' . $this->escapeLikeWildcards($value)
-            ),
+            self::ENDS_WITH => new BinaryFilterOperation(fn ($field, $val) => $expr->like($field, $val), fn ($value) => '%' . $this->escapeLikeWildcards($value)),
         ];
     }
 

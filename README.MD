@@ -17,19 +17,19 @@ Doctrine.
 The following are some query examples showcasing the different filtering and sorting capabilities of the library.
 
 ```http request
-// Returns products with a price range between 100 and 200
+// Products with a price range between 100 and 200
 GET /products?price[gte]=100&price[lte]=200
 
-// Returns all users with a birthday after 1 Jan 2000
+// Users with a birthday after 1 Jan 2000
 GET /users?birthday[gte]=2000-01-01
 
-// Returns all users with an email ending with gmail.com
+// Users with an email ending with gmail.com
 GET /users?email[ends_with]=gmail.com
 
-// Returns customers whose subscription field is null
+// Customers whose subscription field is null
 GET /customers?subscription[is_null]
 
-// Returns all users ordered by their last name in a descending order
+// Users ordered by their last name in a descending order
 GET /users?orderBy[lastName]=desc
 
 // For this query only the status filter and order by id desc will be applied.

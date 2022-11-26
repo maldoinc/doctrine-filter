@@ -83,10 +83,7 @@ class DoctrineFilter
     private function applySorting(array $orderBy): void
     {
         foreach ($orderBy as $value) {
-            $this->queryBuilder->addOrderBy(
-                sprintf('%s.%s', $this->getRootAlias(), $value->getField()),
-                $value->getDirection()
-            );
+            $this->queryBuilder->addOrderBy(sprintf('%s.%s', $this->getRootAlias(), $value->getField()), $value->getDirection());
         }
     }
 
@@ -99,7 +96,9 @@ class DoctrineFilter
     {
         $this->parameterIndex = 0;
 
-        /** @var class-string $rootEntity */
+        /** @var class-string $rootEntity
+         * @noinspection PhpRedundantVariableDocTypeInspection
+         */
         $rootEntity = $this->queryBuilder->getRootEntities()[0];
         $exposedFields = $this->exposedFields[$rootEntity];
 
@@ -112,16 +111,9 @@ class DoctrineFilter
             $operator = $filterAction->operator;
 
             if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
-                $supportedFields = implode(
-                    ', ',
-                    array_intersect(array_keys($this->ops), $exposedField->getOperators())
-                );
+                $supportedFields = implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()));
 
-                $message = sprintf('Unknown operator "%s". Supported values for field %s are: [%s]',
-                    $operator,
-                    $filterAction->publicFieldName,
-                    $supportedFields
-                );
+                $message = sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $filterAction->publicFieldName, $supportedFields);
 
                 throw new InvalidFilterOperatorException($message);
             }

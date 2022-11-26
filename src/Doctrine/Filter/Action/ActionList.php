@@ -20,7 +20,15 @@ class ActionList
         $this->orderByActions = $orderByActions;
     }
 
-    public static function fromQueryString(string $queryString, string $orderByKey = null): self
+    /**
+     * Parse the query string using php's `parse_str` method and create an instance of this class
+     * with any filter and sort actions found in it.
+     *
+     * @param ?string $orderByKey The name under which to look for sort actions
+     *
+     * @see parse_str
+     */
+    public static function fromQueryString(string $queryString, ?string $orderByKey = null): self
     {
         $filterActions = [];
         $orderByActions = [];

@@ -10,9 +10,6 @@ class NativeAttributeReader implements AttributeReaderInterface
             throw new \Exception(sprintf('%s is not supported for PHP versions < 8', self::class));
         }
 
-        return array_map(
-            fn (\ReflectionAttribute $attribute) => $attribute->newInstance(),
-            $reflectionProperty->getAttributes($attributeClass, \ReflectionAttribute::IS_INSTANCEOF)
-        );
+        return array_map(fn (\ReflectionAttribute $attribute) => $attribute->newInstance(), $reflectionProperty->getAttributes($attributeClass, \ReflectionAttribute::IS_INSTANCEOF));
     }
 }
