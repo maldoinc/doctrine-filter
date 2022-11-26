@@ -7,7 +7,7 @@ using a map with filter names as keys and an operation as the value.
 The return of the operation's callback can be anything that can be passed to the query builder's `andWhere` method, 
 including complex expressions.
 
-Example below: An `is_empty_or_null` filter which returns all rows where the value is either blank or null.
+## Examples
 
 ```php
     /**
@@ -16,7 +16,8 @@ Example below: An `is_empty_or_null` filter which returns all rows where the val
     public function getUnaryOperators(): array
     {
         return [
-            'is_empty_or_null' => new UnaryFilterOperation(function ($field) {
+            // Filter which matches all blank or null values. 
+            'is_empty' => new UnaryFilterOperation(function ($field) {
                 $expr = new Expr();
 
                 return $expr->orX($expr->length($field), $expr->isNull($field));
@@ -25,10 +26,8 @@ Example below: An `is_empty_or_null` filter which returns all rows where the val
             // Hide logic from the url and expose a filter 
             // only for things that implement the right interface.
             'is_subscribed' => new UnaryFilterOperation(function ($field) {
-                return (new Expr())->isNotNull('subscribedAt'); 
-            }, function (string $className) {
-                return class_implements($className, SubscribableEntityInterface::class);
-            })
+                return (new Expr())->isNotNull('subscribedAt');
+            }, fn(string $className) => class_implements($className, SubscribableEntityInterface::class))
         ];
     }
 ```

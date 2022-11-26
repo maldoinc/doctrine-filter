@@ -1,3 +1,5 @@
+## Getting started
+
 ## Guide
 
 This section will guide you with the implementation of this library into your project. On the most basic level, you will
