@@ -75,7 +75,7 @@ class FilteredQueryBuilder
             $fieldReader->readExposedFields($queryBuilder), 
             [new PresetFilterProvider()]
         );
-        $filter->apply(ActionList::fromQueryString($request->getContent());
+        $filter->apply(ActionList::fromArray($request->query->all());
         
         // ... Any additional processing
 

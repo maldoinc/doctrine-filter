@@ -30,26 +30,31 @@ class ActionList
      */
     public static function fromQueryString(string $queryString, ?string $orderByKey = null): self
     {
+        parse_str($queryString, $queryData);
+
+        /* @phpstan-ignore-next-line */
+        return self::fromArray($queryData, $orderByKey);
+    }
+
+    /**
+     * @param array<string, string|array<string, string|int>> $data
+     */
+    public static function fromArray(array $data, ?string $orderByKey = null): self
+    {
         $filterActions = [];
         $orderByActions = [];
 
-        parse_str($queryString, $res);
-
-        if ($orderByKey && isset($res[$orderByKey]) && is_array($res[$orderByKey])) {
-            foreach ($res[$orderByKey] as $field => $direction) {
-                /*
-                 * @phpstan-ignore-next-line Phpstan gets confused about $field being an int
-                 */
-                $orderByActions[] = new OrderByAction($field, $direction);
+        if ($orderByKey && isset($data[$orderByKey]) && is_array($data[$orderByKey])) {
+            foreach ($data[$orderByKey] as $field => $direction) {
+                if (is_string($direction) && in_array(strtolower($direction), ['asc', 'desc'])) {
+                    $orderByActions[] = new OrderByAction($field, $direction);
+                }
             }
         }
 
-        foreach ($res as $field => $fieldFilters) {
+        foreach ($data as $field => $fieldFilters) {
             if (is_array($fieldFilters)) {
                 foreach ($fieldFilters as $operator => $value) {
-                    /*
-                     * @phpstan-ignore-next-line Phpstan gets confused about $field being an int
-                     */
                     $filterActions[] = new FilterAction($field, $operator, $value);
                 }
             }

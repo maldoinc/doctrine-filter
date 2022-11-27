@@ -33,7 +33,7 @@ $doctrineFilter = new DoctrineFilter(
 
 // Now that we have a DoctrineFilter instance we need to tell it actions to take.
 // We also tell it to look for sort actions under the orderBy key.
-$actions = ActionList::fromQueryString($request->getContent(), 'orderBy');
+$actions = ActionList::fromQueryString($_SERVER['QUERY_STRING'], 'orderBy');
 
 // Finally apply the actions retrieved from the current request to the query builder.
 $doctrineFilter->apply($actions);
