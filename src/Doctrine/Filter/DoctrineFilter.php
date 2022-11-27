@@ -8,10 +8,10 @@ use Maldoinc\Doctrine\Filter\Action\FilterAction;
 use Maldoinc\Doctrine\Filter\Action\OrderByAction;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
-use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
 use Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\BinaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
+use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
 
 class DoctrineFilter
 {
@@ -29,17 +29,17 @@ class DoctrineFilter
 
     /**
      * @param array<class-string, array<string, ExposedField>> $exposedFields
-     * @param FilterExtensionInterface[] $extensions
+     * @param FilterProviderInterface[] $filterProviders
      *
      * @throws EmptyQueryBuilderException
      */
-    public function __construct(QueryBuilder $queryBuilder, array $exposedFields, array $extensions)
+    public function __construct(QueryBuilder $queryBuilder, array $exposedFields, array $filterProviders)
     {
         $this->queryBuilder = $queryBuilder;
         $this->rootAlias = $this->getRootAlias();
         $this->exposedFields = $exposedFields;
 
-        $this->initializeOperations($extensions);
+        $this->initializeOperations($filterProviders);
     }
 
     /**
@@ -67,12 +67,12 @@ class DoctrineFilter
     }
 
     /**
-     * @param FilterExtensionInterface[] $extensions
+     * @param FilterProviderInterface[] $filterProviders
      */
-    private function initializeOperations(array $extensions): void
+    private function initializeOperations(array $filterProviders): void
     {
-        foreach ($extensions as $extension) {
-            $this->ops = array_merge($this->ops, $extension->getOperators());
+        foreach ($filterProviders as $provider) {
+            $this->ops = array_merge($this->ops, $provider->getOperators());
         }
     }
 

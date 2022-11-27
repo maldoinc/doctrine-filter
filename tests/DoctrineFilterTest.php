@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use DeepCopy\Filter\Filter;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\Parser;
@@ -12,9 +11,9 @@ use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Extension\FilterExtensionInterface;
-use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
 use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
+use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
 use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
@@ -29,7 +28,7 @@ class DoctrineFilterTest extends BaseTestCase
         yield new DoctrineFilter(
             $qb,
             (new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader())))->readExposedFields($qb),
-            [new PresetFilters()]
+            [new PresetFilterProvider()]
         );
 
         if (PHP_MAJOR_VERSION >= 8) {
@@ -38,7 +37,7 @@ class DoctrineFilterTest extends BaseTestCase
             yield new DoctrineFilter(
                 $qb8,
                 (new ExposedFieldsReader(new NativeAttributeReader()))->readExposedFields($qb8),
-                [new PresetFilters()]
+                [new PresetFilterProvider()]
             );
         }
     }
@@ -179,7 +178,7 @@ class DoctrineFilterTest extends BaseTestCase
     {
         $this->expectException(EmptyQueryBuilderException::class);
 
-        (new DoctrineFilter(new QueryBuilder($this->entityManager), [], [new PresetFilters()]))->apply(new ActionList([], []));
+        (new DoctrineFilter(new QueryBuilder($this->entityManager), [], [new PresetFilterProvider()]))->apply(new ActionList([], []));
     }
 
     public function testFromQueryStringIgnoreKeyValueFormat()
@@ -242,7 +241,7 @@ class DoctrineFilterTest extends BaseTestCase
         $this->expectException(InvalidFilterOperatorException::class);
         $this->expectExceptionMessage('Operator "is_dummy" not supported for this resource');
 
-        $customFilterWithClassMatcher = new class implements FilterExtensionInterface {
+        $customFilterWithClassMatcher = new class implements FilterProviderInterface {
             public function getOperators(): array
             {
                 return [
@@ -260,6 +259,5 @@ class DoctrineFilterTest extends BaseTestCase
         $filter = new DoctrineFilter($qb, $exposedFieldsReader->readExposedFields($qb), [$customFilterWithClassMatcher]);
 
         $filter->apply(ActionList::fromQueryString("dummyField[is_dummy]"));
-
     }
 }

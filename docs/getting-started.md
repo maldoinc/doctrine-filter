@@ -13,7 +13,7 @@ To create an instance of `DoctrineFilter` you need the following:
 * A query builder with an entity in it (the resource you're filtering)
 * A map with the list of classes and the exposed field for each of them using `ExposedFieldReader`.
     * If you are using the provided reader you need to annotate your entities with the `Expose` annotation.
-* A list of extensions which are the ones that provide the actual filtering capabilities
+* A list of providers, which are the ones that provide the actual filtering capabilities
     * Use the default `Maldoinc\Doctrine\Filter\Provider\PresetFilters` filters
     * Create your own filters and include an instance of it during instantiation to make your own custom filters
       available.

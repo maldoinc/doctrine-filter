@@ -1,10 +1,10 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter\Extension;
+namespace Maldoinc\Doctrine\Filter\Provider;
 
 use Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation;
 
-interface FilterExtensionInterface
+interface FilterProviderInterface
 {
     /**
      * @return AbstractFilterOperation[]
