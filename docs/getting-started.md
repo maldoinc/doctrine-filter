@@ -1,12 +1,11 @@
 ## Getting started
 
-In its basic form you will have a doctrine query builder (such as one created from a repository),
-create a new `DoctrineFilter` instance and apply any filters from the current request.
+In its basic form you will have a query builder and using an instance of `DoctrineFilter` you will apply on it
+operations from the current request.
 
 This will modify your query builder's where section to add the filters from the query string
-and include the new parameters with their corresponding values.
-
-> `INFO`: Any existing where conditions will not be modified.
+and include the new parameters with their corresponding values without removing any current where conditions or
+parameters.
 
 To create an instance of `DoctrineFilter` you need the following:
 
