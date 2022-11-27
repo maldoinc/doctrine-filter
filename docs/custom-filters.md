@@ -10,8 +10,13 @@ including complex expressions.
 ## Examples
 
 ```php
+use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
+use Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation;
+
+class CustomFilterProvider implements FilterProviderInterface
+{
     /**
-     * @return array<string, \Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation> 
+     * @return array<string, AbstractFilterOperation> 
      */
     public function getOperators(): array
     {
@@ -24,6 +29,7 @@ including complex expressions.
             })
         ];
     }
+}
 ```
 
 Then on `DoctrineFilter` instantiation pass this class name alongside

@@ -106,3 +106,5 @@ class BookController extends Controller
 }
 ```
 
+---
+Next chapter: [Custom Filters](custom-filters.md)
