@@ -13,7 +13,7 @@ including complex expressions.
     /**
      * @return array<string, \Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation> 
      */
-    public function getUnaryOperators(): array
+    public function getOperators(): array
     {
         return [
             // Filter which matches all blank or null values. 
