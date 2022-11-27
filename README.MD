@@ -4,8 +4,6 @@ Quickly add advanced filtering and sorting capabilities to any resource in your 
 Doctrine.
 
 <a href="https://travis-ci.com/github/maldoinc/doctrine-filter"><img src='https://api.travis-ci.com/maldoinc/doctrine-filter.svg?branch=master'  alt="Build status"/></a>
-<img src='https://img.shields.io/travis/com/maldoinc/doctrine-filter' />
-<img src='https://img.shields.io/github/license/maldoinc/doctrine-filter' />
 
 ###### Requirements
 
