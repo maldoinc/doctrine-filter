@@ -8,7 +8,7 @@
 namespace App\Tests\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
+use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 
 #[ORM\Entity]
 class Book
@@ -16,11 +16,11 @@ class Book
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[FilterExpose(operators: PresetFilters::ALL_PRESETS)]
+    #[FilterExpose(operators: PresetFilterProvider::ALL_PRESETS)]
     public int $id;
 
     #[ORM\Column]
-    #[FilterExpose(operators: PresetFilters::ALL_PRESETS)]
+    #[FilterExpose(operators: PresetFilterProvider::ALL_PRESETS)]
     public string $name;
 
     #[ORM\Column]
@@ -31,7 +31,7 @@ class Book
      * @FilterExpose(serializedName="published_at")
      */
     #[ORM\Column]
-    #[FilterExpose(operators: PresetFilters::ALL_PRESETS)]
+    #[FilterExpose(operators: PresetFilterProvider::ALL_PRESETS)]
     public \DateTime $publishedAt;
 }
 ```
@@ -50,7 +50,7 @@ use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\Action\ActionList;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Extension\PresetFilters;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader
 ;use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -72,7 +72,7 @@ class FilteredQueryBuilder
         $filter = new DoctrineFilter(
             $queryBuilder, 
             $fieldReader->readExposedFields($queryBuilder), 
-            [new PresetFilters()]
+            [new PresetFilterProvider()]
         );
         $filter->apply(ActionList::fromQueryString($this->requestStack->getCurrentRequest()->query->all()));
 
@@ -82,6 +82,7 @@ class FilteredQueryBuilder
 ```
 
 #### 3. Call service from your controllers
+
 ```php
 # src/Controller/BookController.php
 

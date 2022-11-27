@@ -1,26 +1,50 @@
 ## Getting started
 
-## Guide
+In its basic form you will have a doctrine query builder (such as one created from a repository),
+create a new `DoctrineFilter` instance and apply any filters from the current request.
 
-This section will guide you with the implementation of this library into your project. On the most basic level, you will
-create an instance of `DoctrineFilter` and apply it to your entity query builders before the query is executed.
+This will modify your query builder's where section to add the filters from the query string
+and include the new parameters with their corresponding values.
 
-You can achieve that by using a service or implementing a method in a base controller which will filter the query
-builder.
+> `INFO`: Any existing where conditions will not be modified.
 
-`DoctrineFilter` operates on the query builder using a whitelisted array of fields for the entities present in the
-query builder and the operations allowed for each of them. 
+To create an instance of `DoctrineFilter` you need the following:
 
-The library provides the `Expose` annotation to mark exposed fields as such and includes the
-`ExposedFieldsReader` class which is able to generate the whitelist from the query builder. The following example uses
-this method.
+* A query builder with an entity in it (the resource you're filtering)
+* A map with the list of classes and the exposed field for each of them using `ExposedFieldReader`.
+    * If you are using the provided reader you need to annotate your entities with the `Expose` annotation.
+* A list of extensions which are the ones that provide the actual filtering capabilities
+    * Use the default `Maldoinc\Doctrine\Filter\Provider\PresetFilters` filters
+    * Create your own filters and include an instance of it during instantiation to make your own custom filters
+      available.
+
+```php
+use Maldoinc\Doctrine\Filter\DoctrineFilter;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
+use Maldoinc\Doctrine\Filter\Action\ActionList;
+
+$queryBuilder = $doctrine->getRepository(Book::class)->createQueryBuilder('b');
+
+$doctrineFilter = new DoctrineFilter(
+    $queryBuilder,
+    $exposedFields,
+    [new PresetFilterProvider()]
+);
+
+// Now that we have a DoctrineFilter instance we need to tell it actions to take.
+// We also tell it to look for sort actions under the orderBy key.
+$actions = ActionList::fromQueryString($request->getContent(), 'orderBy');
+
+// Finally apply the actions retrieved from the current request to the query builder.
+$doctrineFilter->apply($actions);
+```
 
 ### Using the library without the `Expose` annotation.
 
 If using attributes is not appropriate for your project you are free to retrieve the list of exposed fields in any
-fashion and simply pass them as an argument to the `DoctrineFilter` constructor.
+fashion (such as loading from a yaml file) and simply pass them as an argument to the `DoctrineFilter` constructor.
 
-DoctrineFilter expects a dictionary for each entity containing a list of the exposed fields
+DoctrineFilter expects a map for each root entity in the query builder containing a list of the exposed fields.
 
 ```php
 $fields = [
