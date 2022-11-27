@@ -1,6 +1,6 @@
 ### Complete implementation in a Symfony project
 
-#### 1. Annotate your entities with the `@Expose` annotation
+#### 1. Annotate your entities with the `@Expose` attribute either via php attributes or doctrine annotations.
 
 ```php
 # src/Entity/Book.php
@@ -8,7 +8,8 @@
 namespace App\Tests\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
+use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 
 #[ORM\Entity]
 class Book
@@ -74,7 +75,9 @@ class FilteredQueryBuilder
             $fieldReader->readExposedFields($queryBuilder), 
             [new PresetFilterProvider()]
         );
-        $filter->apply(ActionList::fromQueryString($this->requestStack->getCurrentRequest()->query->all()));
+        $filter->apply(ActionList::fromQueryString($request->getContent());
+        
+        // ... Any additional processing
 
         return new JsonResponse(['data' => $queryBuilder->getQuery()->getResult()]);
     }

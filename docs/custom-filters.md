@@ -1,10 +1,10 @@
 # Creating custom filters
 
 To add a new filter that is not part of the built-in set you must implement `FilterExtensionInterface` and
-return a list of filters to be exposed from the `getUnaryOperators` and `getBinaryOperators` methods 
-using a map with filter names as keys and an operation as the value.
+return a list of filters to be exposed from the `getOperatorsMethod` using a map with filter names
+as keys and an operation as the value.
 
-The return of the operation's callback can be anything that can be passed to the query builder's `andWhere` method, 
+The return of the operation's callback can be anything that can be passed to the query builder's `andWhere` method,
 including complex expressions.
 
 ## Examples
@@ -21,18 +21,12 @@ including complex expressions.
                 $expr = new Expr();
 
                 return $expr->orX($expr->length($field), $expr->isNull($field));
-            }),
-            
-            // Hide logic from the url and expose a filter 
-            // only for things that implement the right interface.
-            'is_subscribed' => new UnaryFilterOperation(function ($field) {
-                return (new Expr())->isNotNull('subscribedAt');
-            }, fn(string $className) => class_implements($className, SubscribableEntityInterface::class))
+            })
         ];
     }
 ```
 
-Then on `DoctrineFilter` instantiation pass this class name alongside 
+Then on `DoctrineFilter` instantiation pass this class name alongside
 any other filter extensions (such as the preset one) to the constructor.
 
-Now you can use the new filter as such `GET /resource?name[is_empty_or_null]`
+Now you can use the new filter as such `GET /resource?name[is_empty]`
