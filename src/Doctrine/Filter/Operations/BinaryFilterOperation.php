@@ -2,6 +2,8 @@
 
 namespace Maldoinc\Doctrine\Filter\Operations;
 
+use Doctrine\ORM\Query\Expr;
+
 class BinaryFilterOperation extends AbstractFilterOperation
 {
     /**
@@ -17,7 +19,7 @@ class BinaryFilterOperation extends AbstractFilterOperation
     }
 
     /**
-     * @return mixed
+     * @return Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string
      */
     public function getOperationResult(string $fieldName, string $parametrizedValue)
     {

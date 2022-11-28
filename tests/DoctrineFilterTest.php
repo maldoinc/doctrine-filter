@@ -267,4 +267,21 @@ class DoctrineFilterTest extends BaseTestCase
 
         $filter->apply(ActionList::fromQueryString('dummyField[is_dummy]'));
     }
+
+    public function testDoesNotRemoveExistingFilters()
+    {
+        $qb = $this->createQueryBuilder();
+        $qb->orWhere($qb->expr()->isNotNull('x.id'), $qb->expr()->isNull('x.deletedAt'));
+        $qb->setParameter(0, 1);
+
+        $reader = new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader()));
+        $doctrineFilter = new DoctrineFilter($qb, $reader, [new PresetFilterProvider()]);
+        $doctrineFilter->apply(ActionList::fromQueryString('name[eq]=Test'));
+
+        $this->assertEquals(
+            'SELECT x FROM App\Tests\Entity\TestEntity x WHERE (x.id IS NOT NULL OR x.deletedAt IS NULL) ' .
+            'AND x.name = :doctrine_filter_name_eq_0',
+            $qb->getQuery()->getDQL()
+        );
+    }
 }

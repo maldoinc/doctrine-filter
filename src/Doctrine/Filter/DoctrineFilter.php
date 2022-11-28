@@ -2,6 +2,7 @@
 
 namespace Maldoinc\Doctrine\Filter;
 
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\Action\ActionList;
 use Maldoinc\Doctrine\Filter\Action\FilterAction;
@@ -28,6 +29,9 @@ class DoctrineFilter
 
     /** @var array<class-string, array<string, ExposedField>> */
     private array $exposedFields;
+
+    /** @var array<Expr\Comparison|Expr\Func|Expr\Andx|Expr\Orx|string> */
+    private array $expressions = [];
 
     /**
      * @param FilterProviderInterface[] $filterProviders
@@ -134,6 +138,10 @@ class DoctrineFilter
                 $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
             }
         }
+
+        if (count($this->expressions) > 0) {
+            $this->queryBuilder->andWhere(...$this->expressions);
+        }
     }
 
     /**
@@ -144,9 +152,8 @@ class DoctrineFilter
         $paramName = $this->getNextParameterName($field, $operator);
         $aliasedFieldName = sprintf('%s.%s', $this->rootAlias, $field);
 
-        $this->queryBuilder
-            ->andWhere($operation->getOperationResult($aliasedFieldName, ":$paramName"))
-            ->setParameter($paramName, $operation->getValue($value));
+        $this->expressions[] = $operation->getOperationResult($aliasedFieldName, ":$paramName");
+        $this->queryBuilder->setParameter($paramName, $operation->getValue($value));
     }
 
     private function getNextParameterName(string $field, string $operator): string
@@ -159,7 +166,7 @@ class DoctrineFilter
 
     private function applyUnaryFilter(string $field, UnaryFilterOperation $operation): void
     {
-        $this->queryBuilder->andWhere($operation->getOperationResult(sprintf('%s.%s', $this->rootAlias, $field)));
+        $this->expressions[] = $operation->getOperationResult(sprintf('%s.%s', $this->rootAlias, $field));
     }
 
     public function getQueryBuilder(): QueryBuilder
