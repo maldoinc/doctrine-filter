@@ -27,10 +27,6 @@ class Book
     #[ORM\Column]
     public int $notMappedForFiltering;
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @FilterExpose(serializedName="published_at")
-     */
     #[ORM\Column]
     #[FilterExpose(operators: PresetFilterProvider::ALL_PRESETS)]
     public \DateTime $publishedAt;
