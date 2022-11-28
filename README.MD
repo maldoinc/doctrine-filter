@@ -14,26 +14,40 @@ Doctrine.
 
 #### Examples
 
-The following are some query examples showcasing the different filtering and sorting capabilities of the library.
+Products with a price range between 100 and 200
 
-```http request
-// Products with a price range between 100 and 200
+```http 
 GET /products?price[gte]=100&price[lte]=200
+```
 
-// Users with a birthday after 1 Jan 2000
+Users with a birthday after 1 Jan 2000
+
+```http
 GET /users?birthday[gte]=2000-01-01
+```
 
-// Users with an email ending with gmail.com
+Users with an email ending with gmail.com
+
+```http
 GET /users?email[ends_with]=gmail.com
+```
 
-// Customers whose subscription field is null
+Customers whose subscription field is null
+
+```http
 GET /customers?subscription[is_null]
+```
 
-// Users ordered by their last name in a descending order
+Users ordered by their last name in descending order
+
+```http
 GET /users?orderBy[lastName]=desc
+```
 
-// For this query only the status filter and order by id desc will be applied.
-// Any keys not in the specified filter or oderBy format will be ignored
+For this query only the status filter and order by id desc will be applied.
+Any keys not in the specified filter or oderBy format will be ignored
+
+```http
 GET /todos?status[eq]=done&page=1&perPage=10&orderBy[id]=desc
 ``` 
 
