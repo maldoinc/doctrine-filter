@@ -19,6 +19,7 @@ class BinaryFilterOperationDto
     /**
      * @param mixed $left
      * @param mixed $right
+     *
      * @return mixed
      */
     public function getOperationResult($left, $right)
@@ -30,6 +31,7 @@ class BinaryFilterOperationDto
 
     /**
      * @param mixed $value
+     *
      * @return mixed
      */
     public function getValue($value)
