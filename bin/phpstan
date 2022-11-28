@@ -1,0 +1,3 @@
+#! /usr/bin/env sh
+
+./vendor/bin/phpstan analyze -c .phpstan.neon src

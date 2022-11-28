@@ -1,9 +1,15 @@
 <?php
+/**
+ * @noinspection PhpUnused
+ * @noinspection PhpLanguageLevelInspection
+ */
 
 namespace App\Tests\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Maldoinc\Doctrine\Filter\Annotation\Expose;
 use Maldoinc\Doctrine\Filter\Annotation\Expose as FilterExpose;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 
 /**
  * @ORM\Entity
@@ -14,35 +20,50 @@ class TestEntity
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @FilterExpose
+     * @FilterExpose(operators=PresetFilterProvider::ALL_PRESETS)
      */
-    public $id;
+    #[Expose(operators: PresetFilterProvider::ALL_PRESETS)]
+    public int $id;
 
     /**
      * @ORM\Column(name="name", type="string", length=255)
-     * @FilterExpose
+     * @FilterExpose(operators=PresetFilterProvider::ALL_PRESETS)
      */
-    public $name;
+    #[Expose(operators: PresetFilterProvider::ALL_PRESETS)]
+    public string $name;
 
     /**
      * @ORM\Column(name="age", type="int")
-     * @FilterExpose
+     * @FilterExpose(operators=PresetFilterProvider::ALL_PRESETS)
      */
-    public $age;
+    #[Expose(operators: PresetFilterProvider::ALL_PRESETS)]
+    public int $age;
 
     /**
      * @ORM\Column(type="json")
-     * @FilterExpose
+     * @FilterExpose(operators=PresetFilterProvider::ALL_PRESETS)
      *
      * @var array<string>
      */
-    public $tag = [];
+    #[Expose(operators: PresetFilterProvider::ALL_PRESETS)]
+    public array $tag = [];
 
-    public $notMappedForFiltering;
+    public int $notMappedForFiltering;
+
+    /**
+     * @ORM\Column
+     * @FilterExpose(operators={"is_dummy"})
+     */
+    #[FilterExpose(operators: ["is_dummy"])]
+    public int $dummyField;
 
     /**
      * @ORM\Column(type="integer")
-     * @FilterExpose(serializedName="serialized_with_underscores")
+     * @FilterExpose(
+     *     operators=PresetFilterProvider::ALL_PRESETS,
+     *     serializedName="serialized_with_underscores"
+     * )
      */
-    public $serializedWithUnderscores;
+    #[Expose(serializedName: "serialized_with_underscores", operators: PresetFilterProvider::ALL_PRESETS)]
+    public int $serializedWithUnderscores;
 }

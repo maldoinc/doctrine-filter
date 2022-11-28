@@ -20,12 +20,14 @@
     ],
     "version": "0.1",
     "require": {
-        "php": "^7.3|^8",
+        "php": "^7.4|^8",
         "doctrine/orm": "^2"
     },
     "require-dev": {
         "phpunit/phpunit": "^9",
-        "phpstan/phpstan": "^0.12.71"
+        "phpstan/phpstan": "^1.9",
+        "friendsofphp/php-cs-fixer": "3.*",
+        "symfony/cache": "5.*"
     },
     "autoload-dev": {
         "psr-4": {
