@@ -13,9 +13,9 @@ use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
-use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
 use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class DoctrineFilterTest extends BaseTestCase
 {

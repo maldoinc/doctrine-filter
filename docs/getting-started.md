@@ -22,8 +22,8 @@ To create an instance of `DoctrineFilter` you need the following:
 use Maldoinc\Doctrine\Filter\Action\ActionList;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
 use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 $queryBuilder = $doctrine->getRepository(Book::class)->createQueryBuilder('b');
 

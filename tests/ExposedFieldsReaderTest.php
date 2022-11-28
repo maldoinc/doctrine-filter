@@ -6,10 +6,10 @@ use App\Tests\Entity\TestEntity;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Maldoinc\Doctrine\Filter\Model\ExposedField;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
-use Maldoinc\Doctrine\Filter\Reader\AttributeReaderInterface;
-use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\AttributeReaderInterface;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
 use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class ExposedFieldsReaderTest extends BaseTestCase
 {

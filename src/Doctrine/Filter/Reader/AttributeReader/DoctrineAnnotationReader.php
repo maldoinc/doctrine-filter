@@ -1,6 +1,6 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter\Reader;
+namespace Maldoinc\Doctrine\Filter\Reader\AttributeReader;
 
 use Doctrine\Common\Annotations\Reader;
 

@@ -44,7 +44,14 @@ class Book
 
 namespace App\Service;
 
-use Doctrine\Common\Cache\FilesystemCache;use Doctrine\ORM\QueryBuilder;use Maldoinc\Doctrine\Filter\Action\ActionList;use Maldoinc\Doctrine\Filter\DoctrineFilter;use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;use Symfony\Component\HttpFoundation\JsonResponse;use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\ORM\QueryBuilder;
+use Maldoinc\Doctrine\Filter\Action\ActionList;
+use Maldoinc\Doctrine\Filter\DoctrineFilter;
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
+use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class FilteredQueryBuilder
 {

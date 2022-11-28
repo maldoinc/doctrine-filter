@@ -4,6 +4,7 @@ namespace Maldoinc\Doctrine\Filter\Reader;
 
 use Maldoinc\Doctrine\Filter\Annotation\Expose;
 use Maldoinc\Doctrine\Filter\Model\ExposedField;
+use Maldoinc\Doctrine\Filter\Reader\AttributeReader\AttributeReaderInterface;
 
 class ExposedFieldsReader implements FilterReaderInterface
 {
