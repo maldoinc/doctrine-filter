@@ -1,11 +1,31 @@
 ## Getting started
 
-In its basic form you will have a query builder and using an instance of `DoctrineFilter` you will apply on it
-operations from the current request.
+In its basic form, you will mark your entity fields with an annotation and 
+have a query builder and using an instance of `DoctrineFilter` you will apply on it operations from the current request.
 
 This will modify your query builder's where section to add the filters from the query string
 and include the new parameters with their corresponding values without removing any current where conditions or
 parameters.
+
+### The `Expose` annotation
+
+The first step is to mark the exposed entity fields with the provided `Expose` annotation.
+
+This can only be applied in properties of entities and contains two parameters:
+
+#### `serializedName`
+This is the public name of your field. If using a serializer set this to whatever the serializer
+is producing. E.g: a field `createdAt` is most likely serialized as `created_at`.
+
+#### `operators`
+By default, no operations can be executed on a field. You must choose what operations to allow on it,
+by passing a list of strings, which are the operator names.
+The preset filter provider contains a `ALL_PRESETS` constant which lists all the preset filters available.
+
+> For DB performance reasons it is recommended that you only enable certain fields for filtering depending on the
+> field and db indexing.
+
+### Creating `DoctrineFilter`
 
 To create an instance of `DoctrineFilter` you need the following:
 
@@ -41,26 +61,5 @@ $actions = ActionList::fromQueryString($_SERVER['QUERY_STRING'], 'orderBy');
 $doctrineFilter->apply($actions);
 ```
 
-### Using the library without the `Expose` annotation.
-
-If using attributes is not appropriate for your project you are free to retrieve the list of exposed fields in any
-fashion (such as loading from a yaml file) and simply pass them as an argument to the `DoctrineFilter` constructor.
-
-DoctrineFilter expects a map for each root entity in the query builder containing a list of the exposed fields.
-
-```php
-$fields = [
-    SomeEntity::class => [
-        'id' => ExposedField(fieldName: 'id', exposedOperators: ['eq']),
-        'public_serialized_name' => ExposeField(
-            fieldName: 'classFieldName', 
-            exposedOperators: ['eq', 'neq', 'starts_with', 'contains', 'ends_with']
-        ),
-    ],
-    OtherEntity::class => [...]
-]
-```
-
 ---
-Next chapter: [Symfony example](guide-symfony.md)
 
