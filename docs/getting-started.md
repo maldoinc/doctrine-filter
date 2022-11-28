@@ -15,6 +15,8 @@ This can only be applied to properties of entities and contains two parameters:
 This is the public name of your field. If using a serializer set this to whatever the serializer
 is producing. E.g: a field `createdAt` is most likely serialized as `created_at`.
 
+> If not provided this will use the field name as the value.
+
 #### `operators`
 By default, no operations can be executed on a field. You must choose what operations to allow on it,
 by passing a list of strings, which are the operator names.
@@ -59,4 +61,5 @@ $doctrineFilter->apply($actions);
 ```
 
 ---
+Next chapter: [Symfony guide](guide-symfony.md)
 

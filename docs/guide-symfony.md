@@ -57,10 +57,6 @@ class FilteredQueryBuilder
     {
         // Use the built-in reader based on php attribute reader.
         // Doctrine annotation reader is also available.
-        
-        // You are free however to use something else if annotations
-        // are not appropriate for your project,
-        // such as loading them from a yaml, php or xml file.
         $fieldReader = new ExposedFieldsReader(new NativeAttributeReader());
 
         $filter = new DoctrineFilter($queryBuilder, $fieldReader, [new PresetFilterProvider()]);
