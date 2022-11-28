@@ -33,6 +33,7 @@ class ExposedFieldsReader
 
     /**
      * @phpstan-param class-string $class
+     *
      * @phpstan-return array<string, ExposedField>
      *
      * @throws \Exception

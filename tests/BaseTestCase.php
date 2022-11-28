@@ -17,7 +17,7 @@ abstract class BaseTestCase extends TestCase
     protected function setUp(): void
     {
         $config = ORMSetup::createConfiguration(true);
-        $driver = new AnnotationDriver(new AnnotationReader(), [sprintf("%s/Entity", __DIR__)]);
+        $driver = new AnnotationDriver(new AnnotationReader(), [sprintf('%s/Entity', __DIR__)]);
         $config->setMetadataDriverImpl($driver);
 
         $this->entityManager = EntityManager::create(['driver' => 'pdo_sqlite', 'memory' => true], $config);

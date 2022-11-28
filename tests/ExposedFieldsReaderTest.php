@@ -35,7 +35,7 @@ class ExposedFieldsReaderTest extends BaseTestCase
                 'age' => new ExposedField('age', PresetFilterProvider::ALL_PRESETS),
                 'tag' => new ExposedField('tag', PresetFilterProvider::ALL_PRESETS),
                 'serialized_with_underscores' => new ExposedField('serializedWithUnderscores', PresetFilterProvider::ALL_PRESETS),
-                'dummyField' => new ExposedField('dummyField', ["is_dummy"])
+                'dummyField' => new ExposedField('dummyField', ['is_dummy']),
             ]],
             (new ExposedFieldsReader($reader))->readExposedFields($qb)
         );

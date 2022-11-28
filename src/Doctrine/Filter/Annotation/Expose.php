@@ -4,6 +4,7 @@ namespace Maldoinc\Doctrine\Filter\Annotation;
 
 /**
  * @Annotation
+ *
  * @Target("PROPERTY")
  */
 #[\Attribute(\Attribute::TARGET_PROPERTY)]

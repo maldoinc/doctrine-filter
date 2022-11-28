@@ -215,7 +215,7 @@ class DoctrineFilterTest extends BaseTestCase
             ['x.id asc, x.name desc', 'orderBy[id]=asc&orderBy[name]=desc'],
             ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
             ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
-            ['', 'this=that&orderBy=asc']
+            ['', 'this=that&orderBy=asc'],
         ];
     }
 
@@ -241,15 +241,15 @@ class DoctrineFilterTest extends BaseTestCase
         $this->expectException(InvalidFilterOperatorException::class);
         $this->expectExceptionMessage('Operator "is_dummy" not supported for this resource');
 
-        $customFilterWithClassMatcher = new class implements FilterProviderInterface {
+        $customFilterWithClassMatcher = new class() implements FilterProviderInterface {
             public function getOperators(): array
             {
                 return [
                     'is_dummy' => new UnaryFilterOperation(function () {
-                        throw new \Exception("Should not be here");
+                        throw new \Exception('Should not be here');
                     }, null, function () {
                         return false;
-                    })
+                    }),
                 ];
             }
         };
@@ -258,6 +258,6 @@ class DoctrineFilterTest extends BaseTestCase
         $exposedFieldsReader = new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader()));
         $filter = new DoctrineFilter($qb, $exposedFieldsReader->readExposedFields($qb), [$customFilterWithClassMatcher]);
 
-        $filter->apply(ActionList::fromQueryString("dummyField[is_dummy]"));
+        $filter->apply(ActionList::fromQueryString('dummyField[is_dummy]'));
     }
 }
