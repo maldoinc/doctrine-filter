@@ -10,18 +10,19 @@ parameters.
 To create an instance of `DoctrineFilter` you need the following:
 
 * A query builder with an entity in it (the resource you're filtering)
-* A map with the list of classes and the exposed field for each of them using `ExposedFieldReader`.
+* An instance of a `FilterReaderInterface` such as the provided `ExposedFieldsReader`
     * If you are using the provided reader you need to annotate your entities with the `Expose` annotation.
+    * Otherwise, feel free to provide any implementation such as reading the data from a yaml or xml file.
 * A list of providers, which are the ones that provide the actual filtering capabilities.
     * Use the default `Maldoinc\Doctrine\Filter\Provider\PresetFilters` filters
     * Create your own filters and include an instance of it during instantiation to make your own custom filters
       available.
 
 ```php
+use Maldoinc\Doctrine\Filter\Action\ActionList;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
-use Maldoinc\Doctrine\Filter\Action\ActionList;
-use \Maldoinc\Doctrine\Filter\ExposedFieldsReader;
+use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
 use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 $queryBuilder = $doctrine->getRepository(Book::class)->createQueryBuilder('b');
@@ -30,11 +31,7 @@ $queryBuilder = $doctrine->getRepository(Book::class)->createQueryBuilder('b');
 // from the repository entities.
 $exposedFieldsReader = new ExposedFieldsReader(new NativeAttributeReader());
 
-$doctrineFilter = new DoctrineFilter(
-    $queryBuilder,
-    $exposedFieldsReader,
-    [new PresetFilterProvider()]
-);
+$doctrineFilter = new DoctrineFilter($queryBuilder, $exposedFieldsReader, [new PresetFilterProvider()]);
 
 // Now that we have a DoctrineFilter instance we need to tell it what filtering actions to take
 // and to look for sort actions under the orderBy key.

@@ -44,17 +44,7 @@ class Book
 
 namespace App\Service;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Cache\FilesystemCache;
-use Doctrine\ORM\QueryBuilder;
-use Maldoinc\Doctrine\Filter\Action\ActionList;
-use Maldoinc\Doctrine\Filter\DoctrineFilter;
-use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
-use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
-use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader
-;use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\Common\Cache\FilesystemCache;use Doctrine\ORM\QueryBuilder;use Maldoinc\Doctrine\Filter\Action\ActionList;use Maldoinc\Doctrine\Filter\DoctrineFilter;use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;use Symfony\Component\HttpFoundation\JsonResponse;use Symfony\Component\HttpFoundation\RequestStack;
 
 class FilteredQueryBuilder
 {
@@ -70,11 +60,7 @@ class FilteredQueryBuilder
         // such as loading them from a yaml, php or xml file.
         $fieldReader = new ExposedFieldsReader(new NativeAttributeReader());
 
-        $filter = new DoctrineFilter(
-            $queryBuilder, 
-            $fieldReader->readExposedFields($queryBuilder), 
-            [new PresetFilterProvider()]
-        );
+        $filter = new DoctrineFilter($queryBuilder, $fieldReader, [new PresetFilterProvider()]);
         $filter->apply(ActionList::fromArray($request->query->all());
         
         // ... Any additional processing

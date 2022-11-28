@@ -4,11 +4,11 @@ namespace App\Tests;
 
 use App\Tests\Entity\TestEntity;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Maldoinc\Doctrine\Filter\ExposedField;
-use Maldoinc\Doctrine\Filter\ExposedFieldsReader;
+use Maldoinc\Doctrine\Filter\Model\ExposedField;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 use Maldoinc\Doctrine\Filter\Reader\AttributeReaderInterface;
 use Maldoinc\Doctrine\Filter\Reader\DoctrineAnnotationReader;
+use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
 use Maldoinc\Doctrine\Filter\Reader\NativeAttributeReader;
 
 class ExposedFieldsReaderTest extends BaseTestCase
@@ -27,7 +27,6 @@ class ExposedFieldsReaderTest extends BaseTestCase
      */
     public function testReader(AttributeReaderInterface $reader)
     {
-        $qb = $this->createQueryBuilder();
         $this->assertEquals(
             [TestEntity::class => [
                 'id' => new ExposedField('id', PresetFilterProvider::ALL_PRESETS),
@@ -37,7 +36,7 @@ class ExposedFieldsReaderTest extends BaseTestCase
                 'serialized_with_underscores' => new ExposedField('serializedWithUnderscores', PresetFilterProvider::ALL_PRESETS),
                 'dummyField' => new ExposedField('dummyField', ['is_dummy']),
             ]],
-            (new ExposedFieldsReader($reader))->readExposedFields($qb)
+            (new ExposedFieldsReader($reader))->getExposedFields([TestEntity::class])
         );
     }
 }

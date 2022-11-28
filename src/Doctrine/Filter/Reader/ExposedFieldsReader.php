@@ -1,34 +1,17 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter;
+namespace Maldoinc\Doctrine\Filter\Reader;
 
-use Doctrine\ORM\QueryBuilder;
 use Maldoinc\Doctrine\Filter\Annotation\Expose;
-use Maldoinc\Doctrine\Filter\Reader\AttributeReaderInterface;
+use Maldoinc\Doctrine\Filter\Model\ExposedField;
 
-class ExposedFieldsReader
+class ExposedFieldsReader implements FilterReaderInterface
 {
     private AttributeReaderInterface $reader;
 
     public function __construct(AttributeReaderInterface $reader)
     {
         $this->reader = $reader;
-    }
-
-    /**
-     * @phpstan-return array<class-string, array<string, ExposedField>>
-     */
-    public function readExposedFields(QueryBuilder $queryBuilder): array
-    {
-        $res = [];
-
-        foreach ($queryBuilder->getRootEntities() as $entity) {
-            if (class_exists($entity)) {
-                $res[$entity] = $this->readFieldsFromClass($entity);
-            }
-        }
-
-        return $res;
     }
 
     /**
@@ -59,5 +42,16 @@ class ExposedFieldsReader
         }
 
         return $result;
+    }
+
+    public function getExposedFields(array $classNames): array
+    {
+        $res = [];
+
+        foreach ($classNames as $className) {
+            $res[$className] = $this->readFieldsFromClass($className);
+        }
+
+        return $res;
     }
 }

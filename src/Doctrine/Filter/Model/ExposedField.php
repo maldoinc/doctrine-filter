@@ -1,6 +1,6 @@
 <?php
 
-namespace Maldoinc\Doctrine\Filter;
+namespace Maldoinc\Doctrine\Filter\Model;
 
 class ExposedField
 {
