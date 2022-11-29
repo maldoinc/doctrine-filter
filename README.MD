@@ -3,7 +3,7 @@
 Quickly add advanced filtering and sorting capabilities to any resource in your APIs or Web apps that use
 Doctrine.
 
-<a href="https://travis-ci.com/github/maldoinc/doctrine-filter"><img src='https://api.travis-ci.com/maldoinc/doctrine-filter.svg?branch=master'  alt="Build status"/></a>
+<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/ci.yml/badge.svg">
 
 ###### Requirements
 

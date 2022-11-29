@@ -48,13 +48,13 @@ class TestEntity
     #[Expose(operators: PresetFilterProvider::ALL_PRESETS)]
     public array $tag = [];
 
-    public int $notMappedForFiltering;
+    public int   $notMappedForFiltering;
 
     /**
      * @ORM\Column
      * @FilterExpose(operators={"is_dummy"})
      */
-    #[FilterExpose(operators: ["is_dummy"])]
+    #[FilterExpose(operators: ['is_dummy'])]
     public int $dummyField;
 
     /**
@@ -64,6 +64,6 @@ class TestEntity
      *     serializedName="serialized_with_underscores"
      * )
      */
-    #[Expose(serializedName: "serialized_with_underscores", operators: PresetFilterProvider::ALL_PRESETS)]
+    #[Expose(serializedName: 'serialized_with_underscores', operators: PresetFilterProvider::ALL_PRESETS)]
     public int $serializedWithUnderscores;
 }
