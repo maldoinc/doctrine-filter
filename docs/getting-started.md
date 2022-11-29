@@ -1,4 +1,4 @@
-## Getting started
+## Getting Started
 
 In its basic form, you will annotate entity fields, and using an instance of DoctrineFilter you will apply 
 on a Query Builder operations from the current request.
@@ -61,5 +61,5 @@ $doctrineFilter->apply($actions);
 ```
 
 ---
-Next chapter: [Symfony guide](guide-symfony.md)
+Next chapter: [Symfony Guide](guide-symfony.md)
 

@@ -1,4 +1,4 @@
-## Creating custom filters
+## Custom Filters
 
 To add a new filter that is not part of the built-in set you must implement `FilterExtensionInterface` and
 return a list of filters to be exposed from the `getOperators` method using a map with filter names

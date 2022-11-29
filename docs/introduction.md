@@ -1,12 +1,10 @@
-## Purpose
+## Introduction
 
 This library allows you to apply filters to a Doctrine Query Builder instance based on the input from the query string,
 allowing your application or API to implement a common filtering scheme for all the exposed resources.
 
 Note that this library provides only filtering of the Query Builder. Those looking for pagination can use this library
 in conjunction with [BabDev/Pagerfanta](https://github.com/BabDev/Pagerfanta) or similar libraries.
-
-## Filtering and Sorting
 
 ### Filtering
 
@@ -40,4 +38,4 @@ The `orderBy` key can be used multiple times to allow sorting by multiple fields
 E.g: `orderBy[id]=desc&orderBy[lastName]=asc`
 
 ---
-Next chapter: [Getting started](getting-started.md)
+Next chapter: [Getting Started](getting-started.md)

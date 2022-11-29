@@ -1,4 +1,4 @@
-## Complete implementation in a Symfony project
+## Symfony Guide
 
 #### 1. Annotate your entities with the `@Expose` attribute either via php attributes or doctrine annotations.
 
