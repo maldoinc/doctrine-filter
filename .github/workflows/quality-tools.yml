@@ -1,11 +1,14 @@
 on: [ push, pull_request ]
 name: Lint
 jobs:
-    php-cs-fixer:
-        name: PHP-CS-Fixer
+    quality-tools:
+        name: Run PHP-CS-Fixer & PHPStan
         runs-on: ubuntu-latest
         steps:
             -   uses: actions/checkout@v3
+
+            -   name: Install dependencies
+                run: composer install --no-progress --prefer-dist --optimize-autoloader
 
             -   name: PHP-CS-Fixer
                 uses: docker://oskarstark/php-cs-fixer-ga
