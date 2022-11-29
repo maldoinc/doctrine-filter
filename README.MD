@@ -3,7 +3,8 @@
 Quickly add advanced filtering and sorting capabilities to any resource in your APIs or Web apps that use
 Doctrine.
 
-<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/ci.yml/badge.svg">
+<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/tests.yml/badge.svg">
+<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/quality-tools.yml/badge.svg">
 
 ###### Requirements
 
