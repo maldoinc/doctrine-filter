@@ -96,42 +96,24 @@ class DoctrineFilter
     }
 
     /**
-     * @param FilterAction[] $filters
+     * @param FilterAction[] $filterActions
      *
      * @throws InvalidFilterOperatorException
      */
-    private function applyFilters(array $filters): void
+    private function applyFilters(array $filterActions): void
     {
-        /** @var class-string $rootEntity
-         * @noinspection PhpRedundantVariableDocTypeInspection
-         */
-        $rootEntity = $this->queryBuilder->getRootEntities()[0];
-        $exposedFields = $this->exposedFields[$rootEntity];
+        $exposedFields = $this->exposedFields[$this->getRootEntity()];
 
-        foreach ($filters as $filterAction) {
-            if (!array_key_exists($filterAction->publicFieldName, $exposedFields)) {
+        foreach ($filterActions as $action) {
+            if (!array_key_exists($action->publicFieldName, $exposedFields)) {
                 continue;
             }
 
-            $exposedField = $exposedFields[$filterAction->publicFieldName];
-            $operator = $filterAction->operator;
-
-            if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
-                $supportedFields = implode(', ', array_intersect(array_keys($this->ops), $exposedField->getOperators()));
-
-                $message = sprintf('Unknown operator "%s". Supported values for field %s are: [%s]', $operator, $filterAction->publicFieldName, $supportedFields);
-
-                throw new InvalidFilterOperatorException($message);
-            }
-
-            $operation = $this->ops[$operator];
-
-            if (!$operation->supports($rootEntity)) {
-                throw new InvalidFilterOperatorException(sprintf('Operator "%s" not supported for this resource', $operator));
-            }
+            $exposedField = $exposedFields[$action->publicFieldName];
+            $operation = $this->getOperation($action, $exposedField);
 
             if ($operation instanceof BinaryFilterOperation) {
-                $this->applyBinaryFilter($exposedField->getFieldName(), $operator, $operation, $filterAction->value);
+                $this->applyBinaryFilter($exposedField->getFieldName(), $action->operator, $operation, $action->value);
             } elseif ($operation instanceof UnaryFilterOperation) {
                 $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
             }
@@ -140,6 +122,31 @@ class DoctrineFilter
         if (count($this->expressions) > 0) {
             $this->queryBuilder->andWhere(...$this->expressions);
         }
+    }
+
+    /**
+     * @throws InvalidFilterOperatorException
+     */
+    private function getOperation(FilterAction $action, ExposedField $exposedField): AbstractFilterOperation
+    {
+        $operator = $action->operator;
+
+        if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
+            // If the exposed field references a filter that isn't registered that should not be shown here.
+            $sharedFields = array_intersect(array_keys($this->ops), $exposedField->getOperators());
+            $supportedFields = implode(', ', $sharedFields);
+
+            $message = sprintf(
+                'Unknown operator "%s". Supported values for field %s are: [%s]',
+                $operator,
+                $action->publicFieldName,
+                $supportedFields
+            );
+
+            throw new InvalidFilterOperatorException($message);
+        }
+
+        return $this->ops[$operator];
     }
 
     /**
@@ -170,5 +177,14 @@ class DoctrineFilter
     public function getQueryBuilder(): QueryBuilder
     {
         return $this->queryBuilder;
+    }
+
+    /**
+     * @return class-string
+     */
+    private function getRootEntity(): string
+    {
+        /* @phpstan-ignore-next-line */
+        return $this->queryBuilder->getRootEntities()[0];
     }
 }

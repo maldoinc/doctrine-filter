@@ -60,10 +60,10 @@ class TestEntity
     /**
      * @ORM\Column(type="integer")
      * @FilterExpose(
-     *     operators=PresetFilterProvider::ALL_PRESETS,
+     *     operators={PresetFilterProvider::EQ, PresetFilterProvider::NEQ},
      *     serializedName="serialized_with_underscores"
      * )
      */
-    #[Expose(serializedName: 'serialized_with_underscores', operators: PresetFilterProvider::ALL_PRESETS)]
+    #[Expose(serializedName: 'serialized_with_underscores', operators: [PresetFilterProvider::EQ, PresetFilterProvider::NEQ])]
     public int $serializedWithUnderscores;
 }

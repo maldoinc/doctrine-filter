@@ -10,8 +10,6 @@ use Maldoinc\Doctrine\Filter\Action\ActionList;
 use Maldoinc\Doctrine\Filter\DoctrineFilter;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
-use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
-use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
 use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
 use Maldoinc\Doctrine\Filter\Reader\AttributeReader\DoctrineAnnotationReader;
 use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
@@ -205,13 +203,25 @@ class DoctrineFilterTest extends BaseTestCase
         }
     }
 
-    public function testInvalidOperators()
+    public function testUnknownOperators()
     {
         $this->expectException(InvalidFilterOperatorException::class);
         $this->expectExceptionMessage('Unknown operator "DUMMY". Supported values for field age are: [');
 
         foreach ($this->getFilters() as $filter) {
             $filter->apply(ActionList::fromQueryString('ignored=this&age[gt]=50&age[DUMMY]=yes'));
+        }
+    }
+
+    public function testKnownOperatorOnUnsupportedField()
+    {
+        $this->expectException(InvalidFilterOperatorException::class);
+        $this->expectExceptionMessage(
+            'Unknown operator "gt". Supported values for field serialized_with_underscores are: [eq, neq]'
+        );
+
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString('serialized_with_underscores[gt]=5'));
         }
     }
 
@@ -241,31 +251,6 @@ class DoctrineFilterTest extends BaseTestCase
             $this->assertEquals($dql, $filter->getQueryBuilder()->getQuery()->getDQL());
             $this->isValidDql($filter->getQueryBuilder());
         }
-    }
-
-    public function testCustomFilterClassMatcher()
-    {
-        $this->expectException(InvalidFilterOperatorException::class);
-        $this->expectExceptionMessage('Operator "is_dummy" not supported for this resource');
-
-        $customFilterWithClassMatcher = new class() implements FilterProviderInterface {
-            public function getOperators(): array
-            {
-                return [
-                    'is_dummy' => new UnaryFilterOperation(function () {
-                        throw new \Exception('Should not be here');
-                    }, null, function () {
-                        return false;
-                    }),
-                ];
-            }
-        };
-
-        $qb = $this->createQueryBuilder();
-        $exposedFieldsReader = new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader()));
-        $filter = new DoctrineFilter($qb, $exposedFieldsReader, [$customFilterWithClassMatcher]);
-
-        $filter->apply(ActionList::fromQueryString('dummyField[is_dummy]'));
     }
 
     public function testDoesNotRemoveExistingFilters()
