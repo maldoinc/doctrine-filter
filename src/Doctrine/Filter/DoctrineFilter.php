@@ -102,8 +102,6 @@ class DoctrineFilter
      */
     private function applyFilters(array $filters): void
     {
-        $this->parameterIndex = 0;
-
         /** @var class-string $rootEntity
          * @noinspection PhpRedundantVariableDocTypeInspection
          */
