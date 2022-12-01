@@ -35,8 +35,12 @@ class CustomFilterProvider implements FilterProviderInterface
 }
 ```
 
-Then on `DoctrineFilter` instantiation pass this class name alongside
-any other filter extensions (such as the preset one) to the constructor.
+Next, annotate the fields you want this new filter to affect.
+
+> TIP: Create a constant with the names of all the filters you normally provide and use that in the annotation.
+
+Then on `DoctrineFilter` instantiation pass an instance of this class along
+any other filter providers (such as the preset one) to the constructor.
 
 Now you can use the new filter as such `GET /resource?name[is_empty]`
 

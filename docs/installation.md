@@ -7,4 +7,4 @@ composer require maldoinc/doctrine-filter
 ```
 
 ---
-Next chapter: [Introduction](introduction.md)
+Next chapter: [Getting Started](getting-started.md)

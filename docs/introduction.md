@@ -38,4 +38,4 @@ The `orderBy` key can be used multiple times to allow sorting by multiple fields
 E.g: `orderBy[id]=desc&orderBy[lastName]=asc`
 
 ---
-Next chapter: [Getting Started](getting-started.md)
+Next chapter: [Installation](installation.md)

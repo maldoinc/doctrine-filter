@@ -22,8 +22,7 @@ By default, no operations can be executed on a field. You must choose what opera
 by passing a list of strings, which are the operator names.
 The preset filter provider contains a `ALL_PRESETS` constant which lists all the preset filters available.
 
-> For DB performance reasons it is recommended that you only enable certain fields for filtering depending on the
-> field and indexing.
+> Feel free to expose as many operations and fields as possible but be mindful of possible DB performance issues.
 
 ### Creating `DoctrineFilter`
 
