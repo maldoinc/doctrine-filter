@@ -2,6 +2,8 @@
 
 namespace Maldoinc\Doctrine\Filter\Action;
 
+use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
+
 class ActionList
 {
     /** @var FilterAction[] */
@@ -25,21 +27,26 @@ class ActionList
      * with any filter and sort actions found in it.
      *
      * @param ?string $orderByKey The name under which to look for sort actions
+     * @param bool $simpleEquality interpret field=value as an equality operation (same as field[eq]=value)
      *
      * @see parse_str
      */
-    public static function fromQueryString(string $queryString, ?string $orderByKey = null): self
-    {
+    public static function fromQueryString(
+        string $queryString,
+        ?string $orderByKey = null,
+        bool $simpleEquality = false
+    ): self {
         parse_str($queryString, $queryData);
 
         /* @phpstan-ignore-next-line */
-        return self::fromArray($queryData, $orderByKey);
+        return self::fromArray($queryData, $orderByKey, $simpleEquality);
     }
 
     /**
      * @param array<string, string|array<string, string|int>> $data
+     * @param bool $simpleEquality interpret data in the format `key => scalar value` as an equality operation
      */
-    public static function fromArray(array $data, ?string $orderByKey = null): self
+    public static function fromArray(array $data, ?string $orderByKey = null, bool $simpleEquality = false): self
     {
         $filterActions = [];
         $orderByActions = [];
@@ -57,6 +64,8 @@ class ActionList
                 foreach ($fieldFilters as $operator => $value) {
                     $filterActions[] = new FilterAction($field, $operator, $value);
                 }
+            } elseif ($simpleEquality) {
+                $filterActions[] = new FilterAction($field, PresetFilterProvider::EQ, $fieldFilters);
             }
         }
 

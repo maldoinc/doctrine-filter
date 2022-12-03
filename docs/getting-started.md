@@ -51,9 +51,18 @@ $exposedFieldsReader = new ExposedFieldsReader(new NativeAttributeReader());
 
 $doctrineFilter = new DoctrineFilter($queryBuilder, $exposedFieldsReader, [new PresetFilterProvider()]);
 
-// Now that we have a DoctrineFilter instance we need to tell it what filtering actions to take
-// and to look for sort actions under the orderBy key.
-$actions = ActionList::fromQueryString($_SERVER['QUERY_STRING'], 'orderBy');
+// Now that we have a DoctrineFilter instance we need to tell it what filtering actions to take.
+$actions = ActionList::fromQueryString(
+    // This is the query string that will be parsed
+    queryString: $_SERVER['QUERY_STRING'],
+    
+    // The key under which to look for sorting actions
+    orderByKey: 'orderBy', 
+    
+    // Should the field=value syntax be treated as an equality operation?
+    // Makes it equivalent to field[eq]=value.
+    simpleEquality: true 
+);
 
 // Finally apply the actions retrieved from the current request to the query builder.
 $doctrineFilter->apply($actions);

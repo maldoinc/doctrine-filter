@@ -172,6 +172,23 @@ class DoctrineFilterTest extends BaseTestCase
         }
     }
 
+    public function testSimpleEquality()
+    {
+        foreach ($this->getFilters() as $filter) {
+            $filter->apply(ActionList::fromQueryString(
+                'id=5&name=hello&page=3&foo=bar&ignored[maybe]=yes',
+                'orderBy',
+                true
+            ));
+
+            $this->assertEquals(
+                'SELECT x FROM App\Tests\Entity\TestEntity x WHERE ' .
+                'x.id = :doctrine_filter_id_eq_0 AND x.name = :doctrine_filter_name_eq_1',
+                $filter->getQueryBuilder()->getDQL()
+            );
+        }
+    }
+
     public function testNoRootAlias()
     {
         $this->expectException(EmptyQueryBuilderException::class);

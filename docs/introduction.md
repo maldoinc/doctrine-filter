@@ -13,7 +13,7 @@ expressions and can be constrained on which entities it should be possible to ex
 
 | Operator      | Description           | Example                       |
 |---------------|-----------------------|-------------------------------|
-| `eq`          | Equality              | `name[eq]=Jimothy`            |
+| `eq`          | Equality              | `name[eq]=Jimothy`, `id=1`*   |
 | `neq`         | Inequality            | `status[neq]=backlog`         |
 | `gt`          | Greater than          | `price[gt]=10`                |
 | `gte`         | Greater than or equal | `price[gte]=10`               |
@@ -26,6 +26,8 @@ expressions and can be constrained on which entities it should be possible to ex
 | `starts_with` | Starts with           | `name[starts_with]=a`         |
 | `ends_with`   | Ends with             | `email[ends_with]=@gmail.com` |
 | `contains`    | Contains              | `name[containts]=d`           |
+
+\* You can enable treating key=value syntax as an equality operator in the `ActionList` static constructors.
 
 ### Sorting
 

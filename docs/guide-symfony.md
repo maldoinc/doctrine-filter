@@ -60,7 +60,18 @@ class FilteredQueryBuilder
         $fieldReader = new ExposedFieldsReader(new NativeAttributeReader());
 
         $filter = new DoctrineFilter($queryBuilder, $fieldReader, [new PresetFilterProvider()]);
-        $filter->apply(ActionList::fromArray($request->query->all());
+        $actions = ActionList::fromArray(
+            data: $this->requestStack->getCurrentRequest()->query->all(),
+            
+            // The key under which to look for sorting actions
+            orderByKey: 'orderBy', 
+            
+            // Should the field=value syntax be treated as an equality operation?
+            // Makes it equivalent to field[eq]=value.
+            simpleEquality: true 
+        );
+        
+        $filter->apply($actions);
         
         // ... Any additional processing
 
