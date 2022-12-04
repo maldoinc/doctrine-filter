@@ -4,9 +4,9 @@ namespace Maldoinc\Doctrine\Filter\Action;
 
 class FilterAction
 {
-    public ?string $entityAlias = null;
-    public string $publicFieldName;
-    public string $operator;
+    private ?string $entityAlias = null;
+    private string $publicFieldName;
+    private string $operator;
 
     /** @var int|string|null */
     public $value;
@@ -35,5 +35,20 @@ class FilterAction
         }
 
         [$this->entityAlias, $this->publicFieldName] = $parts;
+    }
+
+    public function getEntityAlias(): ?string
+    {
+        return $this->entityAlias;
+    }
+
+    public function getPublicFieldName(): string
+    {
+        return $this->publicFieldName;
+    }
+
+    public function getOperator(): string
+    {
+        return $this->operator;
     }
 }

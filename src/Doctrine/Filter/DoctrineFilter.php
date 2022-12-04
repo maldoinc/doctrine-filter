@@ -116,7 +116,7 @@ class DoctrineFilter
      */
     private function getOperation(FilterAction $action, ExposedField $exposedField): AbstractFilterOperation
     {
-        $operator = $action->operator;
+        $operator = $action->getOperator();
 
         if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
             // If the exposed field references a filter that isn't registered that should not be shown here.
@@ -126,7 +126,7 @@ class DoctrineFilter
             $message = sprintf(
                 'Unknown operator "%s". Supported values for field %s are: [%s]',
                 $operator,
-                $action->publicFieldName,
+                $action->getPublicFieldName(),
                 $supportedFields
             );
 
@@ -141,7 +141,7 @@ class DoctrineFilter
         FilterAction $action,
         BinaryFilterOperation $operation
     ): void {
-        $paramName = $this->getNextParameterName($field->getFieldName(), $action->operator);
+        $paramName = $this->getNextParameterName($field->getFieldName(), $action->getOperator());
 
         $aliasedFieldName = sprintf(
             '%s.%s',
@@ -177,13 +177,13 @@ class DoctrineFilter
 
     private function getExposedFieldForAction(FilterAction $action): ?ExposedField
     {
-        $alias = $action->entityAlias ?: $this->queryBuilderMetadata->getRootAlias();
+        $alias = $action->getEntityAlias() ?: $this->queryBuilderMetadata->getRootAlias();
         $entity = $this->queryBuilderMetadata->getAliasToEntityMap()[$alias] ?? null;
 
         if (!$entity) {
             return null;
         }
 
-        return $this->exposedFields[$entity][$action->publicFieldName] ?? null;
+        return $this->exposedFields[$entity][$action->getPublicFieldName()] ?? null;
     }
 }
