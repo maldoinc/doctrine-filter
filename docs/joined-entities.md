@@ -7,8 +7,8 @@ own operator list.
 
 Now filter joins are available to use via the `name.field` syntax. 
 
-* `/books?author.id=1` (Simple Equality also works with joined fields if enabled.)
 * `/books?author.name[contains]=Bob`
+* `/books?author.id=1` *Simple Equality also works with joined fields if enabled.*
 
 
 > **Why do I have to manually join?** <br />
