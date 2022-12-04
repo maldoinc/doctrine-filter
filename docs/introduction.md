@@ -27,7 +27,8 @@ expressions and can be constrained on which entities it should be possible to ex
 | `ends_with`   | Ends with             | `email[ends_with]=@gmail.com` |
 | `contains`    | Contains              | `name[containts]=d`           |
 
-\* You can enable treating key=value syntax as an equality operator in the `ActionList` static constructors.
+\* By default the `field=value` syntax is off. It can be enabled as an equality operator in the `ActionList` 
+constructors (`simpleEquality: true`).
 
 ### Sorting
 
