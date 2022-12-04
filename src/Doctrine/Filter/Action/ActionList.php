@@ -23,7 +23,27 @@ class ActionList
     }
 
     /**
-     * Parse the query string using php's `parse_str` method and create an instance of this class
+     * Parse a query string while avoiding the replacement of dots into underscores.
+     *
+     * @return array<string|int, string|int|array<string|int>>
+     */
+    private static function parseQueryString(string $queryString): array
+    {
+        /** @var string $queryString */
+        $queryString = preg_replace_callback(
+            '/(?:^|(?<=&))[^=[]+/',
+            fn ($match) => bin2hex(urldecode($match[0])),
+            $queryString
+        );
+
+        parse_str($queryString, $result);
+
+        /* @phpstan-ignore-next-line */
+        return array_combine(array_map('hex2bin', array_keys($result)), $result);
+    }
+
+    /**
+     * Parse the query string and create an instance of this class
      * with any filter and sort actions found in it.
      *
      * @param ?string $orderByKey The name under which to look for sort actions
@@ -36,10 +56,8 @@ class ActionList
         ?string $orderByKey = null,
         bool $simpleEquality = false
     ): self {
-        parse_str($queryString, $queryData);
-
         /* @phpstan-ignore-next-line */
-        return self::fromArray($queryData, $orderByKey, $simpleEquality);
+        return self::fromArray(static::parseQueryString($queryString), $orderByKey, $simpleEquality);
     }
 
     /**

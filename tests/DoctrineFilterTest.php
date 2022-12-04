@@ -2,7 +2,10 @@
 
 namespace App\Tests;
 
+use App\Tests\Entity\Author;
+use App\Tests\Entity\Book;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Query\Parser;
 use Doctrine\ORM\QueryBuilder;
@@ -20,9 +23,9 @@ class DoctrineFilterTest extends BaseTestCase
     /**
      * @return \Generator<DoctrineFilter>
      */
-    private function getFilters(): \Generator
+    private function getFilters(QueryBuilder $qb = null): \Generator
     {
-        $qb = $this->createQueryBuilder();
+        $qb = $qb ?: $this->createQueryBuilder();
         yield new DoctrineFilter(
             $qb,
             new ExposedFieldsReader(new DoctrineAnnotationReader(new AnnotationReader())),
@@ -143,7 +146,7 @@ class DoctrineFilterTest extends BaseTestCase
         ];
     }
 
-    public function testNotExposedOrUknownFields()
+    public function testNotExposedOrUnknownFields()
     {
         foreach ($this->getFilters() as $filter) {
             $filter->apply(ActionList::fromQueryString('not_exposed[gte]=5&unknown_field[yes]=no&hello=world'));
@@ -285,5 +288,26 @@ class DoctrineFilterTest extends BaseTestCase
             'AND x.name = :doctrine_filter_name_eq_0',
             $qb->getQuery()->getDQL()
         );
+    }
+
+    public function testFilterJoinedEntities()
+    {
+        $qb = new QueryBuilder($this->entityManager);
+        $qb->from(Book::class, 'b')->select('b')->join(Author::class, 'author');
+
+        foreach ($this->getFilters($qb) as $filter) {
+            $filter->apply(ActionList::fromQueryString('author.id[eq]=5&name=GoodBook', null, true));
+
+            $this->assertEquals('SELECT b FROM App\Tests\Entity\Book b ' .
+                'INNER JOIN App\Tests\Entity\Author author WHERE author.id = :doctrine_filter_id_eq_0 AND ' .
+                'b.name = :doctrine_filter_name_eq_1', $qb->getDQL());
+
+            $this->assertEquals(new ArrayCollection([
+                new Parameter('doctrine_filter_id_eq_0', '5'),
+                new Parameter('doctrine_filter_name_eq_1', 'GoodBook'),
+            ]), $qb->getParameters());
+        }
+
+        return $qb;
     }
 }

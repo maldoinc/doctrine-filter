@@ -29,15 +29,16 @@ class ExposedFieldsReaderTest extends BaseTestCase
     {
         $this->assertEquals(
             [TestEntity::class => [
-                'id' => new ExposedField('id', PresetFilterProvider::ALL_PRESETS),
-                'name' => new ExposedField('name', PresetFilterProvider::ALL_PRESETS),
-                'age' => new ExposedField('age', PresetFilterProvider::ALL_PRESETS),
-                'tag' => new ExposedField('tag', PresetFilterProvider::ALL_PRESETS),
+                'id' => new ExposedField(TestEntity::class, 'id', PresetFilterProvider::ALL_PRESETS),
+                'name' => new ExposedField(TestEntity::class, 'name', PresetFilterProvider::ALL_PRESETS),
+                'age' => new ExposedField(TestEntity::class, 'age', PresetFilterProvider::ALL_PRESETS),
+                'tag' => new ExposedField(TestEntity::class, 'tag', PresetFilterProvider::ALL_PRESETS),
                 'serialized_with_underscores' => new ExposedField(
+                    TestEntity::class,
                     'serializedWithUnderscores',
                     [PresetFilterProvider::EQ, PresetFilterProvider::NEQ]
                 ),
-                'dummyField' => new ExposedField('dummyField', ['is_dummy']),
+                'dummyField' => new ExposedField(TestEntity::class, 'dummyField', ['is_dummy']),
             ]],
             (new ExposedFieldsReader($reader))->getExposedFields([TestEntity::class])
         );

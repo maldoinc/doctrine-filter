@@ -4,6 +4,7 @@ namespace Maldoinc\Doctrine\Filter\Action;
 
 class FilterAction
 {
+    public ?string $entityAlias = null;
     public string $publicFieldName;
     public string $operator;
 
@@ -15,8 +16,24 @@ class FilterAction
      */
     public function __construct(string $publicFieldName, string $operator, $value = null)
     {
-        $this->publicFieldName = $publicFieldName;
+        $this->parsePublicFieldName($publicFieldName);
         $this->operator = $operator;
         $this->value = $value;
+    }
+
+    /**
+     * Check if the public name uses a dot notation and if so set both the public field name as well as the alias.
+     */
+    private function parsePublicFieldName(string $publicFieldName): void
+    {
+        $parts = explode('.', $publicFieldName, 2);
+
+        if (1 === count($parts)) {
+            $this->publicFieldName = $publicFieldName;
+
+            return;
+        }
+
+        [$this->entityAlias, $this->publicFieldName] = $parts;
     }
 }
