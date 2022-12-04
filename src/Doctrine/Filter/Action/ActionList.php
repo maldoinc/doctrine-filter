@@ -61,6 +61,23 @@ class ActionList
     }
 
     /**
+     * Collects filter and orderBy actions from the data and creates a new instance of this class.
+     *
+     * **WARNING**: If using symfony or HttpFoundation, DO NOT PASS `$request->query->all()` here if you are using join
+     * filter syntax. Due to known behavior in php's `parse_str`, it will convert dots in the query string to
+     * underscores which is unwanted.
+     *
+     * Instead, do one of the following:
+     * - Use `fromQueryString($request->server->get('QUERY_STRING'))` and let this library handle the parsing. DO NOT
+     * use `$request->getQueryString()` as it won't work.
+     * - Use Symfony's HeaderUtils as follows. `HeaderUtils::parseQuery($request->getQueryString()` to generate the
+     * data array and pass that instead.
+     *
+     * @see parse_str
+     * @see https://www.php.net/manual/en/function.parse-str.php
+     * @see https://github.com/symfony/symfony/issues/29664
+     * @see https://github.com/symfony/symfony/pull/37272
+     *
      * @param array<string, string|array<string, string|int>> $data
      * @param bool $simpleEquality interpret data in the format `key => scalar value` as an equality operation
      */

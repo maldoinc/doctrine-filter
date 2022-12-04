@@ -54,6 +54,9 @@ $doctrineFilter = new DoctrineFilter($queryBuilder, $exposedFieldsReader, [new P
 // Now that we have a DoctrineFilter instance we need to tell it what filtering actions to take.
 $actions = ActionList::fromQueryString(
     // This is the query string that will be parsed
+    // If using symfony or HttpFoundation: DO NOT use `$request->getQueryString()` here
+    // Instead fetch the data from `$request->server->get('QUERY_STRING')`.
+    // See ActionList::self::fromArray documentation for more details.
     queryString: $_SERVER['QUERY_STRING'],
     
     // The key under which to look for sorting actions
