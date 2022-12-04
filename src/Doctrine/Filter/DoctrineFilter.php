@@ -70,7 +70,7 @@ class DoctrineFilter
     }
 
     /**
-     * @param OrderByAction[] $orderBy ;
+     * @param OrderByAction[] $orderBy
      */
     private function applySorting(array $orderBy): void
     {
