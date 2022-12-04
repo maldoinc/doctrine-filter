@@ -1,6 +1,6 @@
 # doctrine-filter
 
-Quickly add advanced filtering and sorting capabilities to any resource in your APIs or Web apps that use
+Quickly add advanced filtering and sorting capabilities to resources in your application or API that uses
 Doctrine.
 
 <a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/tests.yml/badge.svg">

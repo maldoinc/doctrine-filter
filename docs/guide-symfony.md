@@ -62,7 +62,7 @@ class FilteredQueryBuilder
         $filter = new DoctrineFilter($queryBuilder, $fieldReader, [new PresetFilterProvider()]);
         $actions = ActionList::fromArray(
             // DO NOT USE $request->query->all() here.
-            // See ActionList::self::fromArray documentation for more details.
+            // See ActionList::fromArray documentation for more details.
             data: HeaderUtils::parseQuery($request->getQueryString()),
             
             // The key under which to look for sorting actions
