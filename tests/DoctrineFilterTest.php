@@ -310,4 +310,28 @@ class DoctrineFilterTest extends BaseTestCase
 
         return $qb;
     }
+
+    public function testFilterJoinedEntitiesAliasedName()
+    {
+        $qb = new QueryBuilder($this->entityManager);
+        $qb->from(Book::class, 'b')->select('b')->join(Author::class, 'author_secondary');
+
+        foreach ($this->getFilters($qb) as $filter) {
+            // Also check that simple equality works for joined entities.
+            $filter->apply(ActionList::fromQueryString('author_secondary.name=Ben', null, true));
+
+            $this->assertEquals(
+                'SELECT b FROM App\Tests\Entity\Book b INNER JOIN ' .
+                'App\Tests\Entity\Author author_secondary WHERE author_secondary.name = :doctrine_filter_name_eq_0',
+                $qb->getDQL()
+            );
+
+            $this->assertEquals(
+                new ArrayCollection([new Parameter('doctrine_filter_name_eq_0', 'Ben')]),
+                $qb->getParameters()
+            );
+        }
+
+        return $qb;
+    }
 }

@@ -39,4 +39,12 @@ class Book
     #[ORM\ManyToOne]
     #[FilterExpose]
     public Author $author;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Author::class)
+     * @FilterExpose(serializedName="author_serialized_name")
+     */
+    #[ORM\ManyToOne]
+    #[FilterExpose(serializedName: 'author_secondary')]
+    public Author $author2;
 }
