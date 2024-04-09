@@ -250,6 +250,7 @@ class DoctrineFilterTest extends BaseTestCase
             ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
             ['x.id desc', 'orderBy[id]=asc&orderBy[id]=desc'],
             ['', 'this=that&orderBy=asc'],
+            ['x.serializedWithUnderscores asc', 'orderBy[serialized_with_underscores]=asc'],
         ];
     }
 

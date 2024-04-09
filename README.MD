@@ -46,7 +46,7 @@ GET /users?orderBy[lastName]=desc
 ```
 
 For this query only the status filter and order by id desc will be applied.
-Any keys not in the specified filter or oderBy format will be ignored
+Any keys not in the specified filter or orderBy format will be ignored
 
 ```http
 GET /todos?status[eq]=done&page=1&perPage=10&orderBy[id]=desc

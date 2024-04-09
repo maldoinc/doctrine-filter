@@ -90,8 +90,19 @@ class DoctrineFilter
      */
     private function applySorting(array $orderBy): void
     {
+        $exposedFields = $this->exposedFields[$this->getRootEntity()];
+
         foreach ($orderBy as $value) {
-            $this->queryBuilder->addOrderBy(sprintf('%s.%s', $this->getRootAlias(), $value->getField()), $value->getDirection());
+            if (!array_key_exists($value->getField(), $exposedFields)) {
+                continue;
+            }
+
+            $exposedField = $exposedFields[$value->getField()];
+
+            $this->queryBuilder->addOrderBy(
+                sprintf('%s.%s', $this->getRootAlias(), $exposedField->getFieldName()),
+                $value->getDirection()
+            );
         }
     }
 
