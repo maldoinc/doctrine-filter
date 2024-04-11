@@ -14,12 +14,14 @@ class QueryBuilderMetadataReader
      */
     public static function getMetadata(QueryBuilder $queryBuilder): QueryBuilderMetadata
     {
-        if (0 === count($queryBuilder->getRootAliases())) {
+        $rootAliases = $queryBuilder->getRootAliases();
+
+        if (0 === count($rootAliases)) {
             throw new EmptyQueryBuilderException('Query builder must contain at least one alias');
         }
 
         /** @var array<string, class-string> $aliasToEntityMap */
-        $aliasToEntityMap = [$queryBuilder->getRootAliases()[0] => $queryBuilder->getRootEntities()[0]];
+        $aliasToEntityMap = [$rootAliases[0] => $queryBuilder->getRootEntities()[0]];
 
         /** @var array<string, array<string, Join>> $joinPart */
         $joinPart = $queryBuilder->getDQLPart('join');
@@ -32,6 +34,6 @@ class QueryBuilderMetadataReader
             }
         }
 
-        return new QueryBuilderMetadata($queryBuilder->getRootAliases()[0] ?? null, $aliasToEntityMap);
+        return new QueryBuilderMetadata($rootAliases[0], $aliasToEntityMap);
     }
 }

@@ -4,7 +4,7 @@ namespace Maldoinc\Doctrine\Filter\Model;
 
 class QueryBuilderMetadata
 {
-    private ?string $rootAlias;
+    private string $rootAlias;
 
     /** @var array<string, class-string> */
     private array $aliasToEntityMap;
@@ -15,14 +15,14 @@ class QueryBuilderMetadata
     /**
      * @param array<string, class-string> $aliasToEntityMap
      */
-    public function __construct(?string $rootAlias, array $aliasToEntityMap)
+    public function __construct(string $rootAlias, array $aliasToEntityMap)
     {
         $this->rootAlias = $rootAlias;
         $this->aliasToEntityMap = $aliasToEntityMap;
         $this->entityToAliasMap = array_flip($aliasToEntityMap);
     }
 
-    public function getRootAlias(): ?string
+    public function getRootAlias(): string
     {
         return $this->rootAlias;
     }
