@@ -3,8 +3,9 @@
 Quickly add advanced filtering and sorting capabilities to resources in your application or API that uses
 Doctrine.
 
-<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/tests.yml/badge.svg">
-<a href="#"><img src="https://github.com/maldoinc/doctrine-filter/actions/workflows/quality-tools.yml/badge.svg">
+[![License](https://img.shields.io/github/license/maldoinc/doctrine-filter)](https://github.com/maldoinc/doctrine-filter)
+[![Unit tests](https://github.com/maldoinc/doctrine-filter/actions/workflows/tests.yml/badge.svg)](https://github.com/maldoinc/doctrine-filter)
+[![Lint](https://github.com/maldoinc/doctrine-filter/actions/workflows/quality-tools.yml/badge.svg)](https://github.com/maldoinc/doctrine-filter)
 
 ###### Requirements
 
@@ -46,7 +47,7 @@ GET /users?orderBy[lastName]=desc
 ```
 
 For this query only the status filter and order by id desc will be applied.
-Any keys not in the specified filter or oderBy format will be ignored
+Any keys not in the specified filter or orderBy format will be ignored
 
 ```http
 GET /todos?status[eq]=done&page=1&perPage=10&orderBy[id]=desc
