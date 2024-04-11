@@ -74,9 +74,24 @@ class DoctrineFilter
      */
     private function applySorting(array $orderBy): void
     {
+        $rootAlias = $this->queryBuilderMetadata->getRootAlias();
+        $rootEntity = $this->queryBuilderMetadata->getAliasToEntityMap()[$rootAlias];
+
+        if (!array_key_exists($rootEntity, $this->exposedFields)) {
+            return;
+        }
+
+        $exposedFields = $this->exposedFields[$rootEntity];
+
         foreach ($orderBy as $value) {
+            if (!array_key_exists($value->getField(), $exposedFields)) {
+                continue;
+            }
+
+            $exposedField = $exposedFields[$value->getField()];
+
             $this->queryBuilder->addOrderBy(
-                sprintf('%s.%s', $this->queryBuilderMetadata->getRootAlias(), $value->getField()),
+                sprintf('%s.%s', $rootAlias, $exposedField->getFieldName()),
                 $value->getDirection()
             );
         }
