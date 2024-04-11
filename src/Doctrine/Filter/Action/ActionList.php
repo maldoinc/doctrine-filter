@@ -70,7 +70,7 @@ class ActionList
      * Instead, do one of the following:
      * - Use `fromQueryString($request->server->get('QUERY_STRING'))` and let this library handle the parsing. DO NOT
      * use `$request->getQueryString()` as it won't work.
-     * - Use Symfony's HeaderUtils as follows. `HeaderUtils::parseQuery($request->getQueryString()` to generate the
+     * - Use Symfony's HeaderUtils as follows. `HeaderUtils::parseQuery($request->getQueryString())` to generate the
      * data array and pass that instead.
      *
      * @see parse_str
