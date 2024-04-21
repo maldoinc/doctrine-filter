@@ -3,7 +3,9 @@
 Quickly add advanced filtering and sorting capabilities to any resource in your APIs or Web apps that use
 Doctrine.
 
-[![License](https://img.shields.io/github/license/maldoinc/doctrine-filter)](https://github.com/maldoinc/doctrine-filter)
+[![License](http://poser.pugx.org/maldoinc/doctrine-filter/license)](https://packagist.org/packages/maldoinc/doctrine-filter)
+[![PHP Version Require](http://poser.pugx.org/maldoinc/doctrine-filter/require/php)](https://packagist.org/packages/maldoinc/doctrine-filter)
+[![Version](http://poser.pugx.org/maldoinc/doctrine-filter/version)](https://packagist.org/packages/maldoinc/doctrine-filter)
 [![Unit tests](https://github.com/maldoinc/doctrine-filter/actions/workflows/tests.yml/badge.svg)](https://github.com/maldoinc/doctrine-filter)
 [![Lint](https://github.com/maldoinc/doctrine-filter/actions/workflows/quality-tools.yml/badge.svg)](https://github.com/maldoinc/doctrine-filter)
 
