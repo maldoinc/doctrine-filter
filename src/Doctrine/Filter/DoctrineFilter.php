@@ -10,19 +10,20 @@ use Maldoinc\Doctrine\Filter\Action\OrderByAction;
 use Maldoinc\Doctrine\Filter\Exception\EmptyQueryBuilderException;
 use Maldoinc\Doctrine\Filter\Exception\InvalidFilterOperatorException;
 use Maldoinc\Doctrine\Filter\Model\ExposedField;
+use Maldoinc\Doctrine\Filter\Model\QueryBuilderMetadata;
 use Maldoinc\Doctrine\Filter\Operations\AbstractFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\BinaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Operations\UnaryFilterOperation;
 use Maldoinc\Doctrine\Filter\Provider\FilterProviderInterface;
+use Maldoinc\Doctrine\Filter\QueryBuilder\QueryBuilderMetadataReader;
 use Maldoinc\Doctrine\Filter\Reader\FilterReaderInterface;
 
 class DoctrineFilter
 {
     private QueryBuilder $queryBuilder;
+    private QueryBuilderMetadata $queryBuilderMetadata;
 
     private int $parameterIndex = 0;
-
-    private string $rootAlias;
 
     /** @var array<string, AbstractFilterOperation> */
     private array $ops = [];
@@ -40,10 +41,10 @@ class DoctrineFilter
      */
     public function __construct(QueryBuilder $queryBuilder, FilterReaderInterface $filterReader, array $filterProviders)
     {
+        $this->queryBuilderMetadata = QueryBuilderMetadataReader::getMetadata($queryBuilder);
         $this->queryBuilder = $queryBuilder;
-        $this->rootAlias = $this->getRootAlias();
         $this->exposedFields = $filterReader->getExposedFields(
-            array_filter($queryBuilder->getRootEntities(), 'class_exists')
+            array_values($this->queryBuilderMetadata->getAliasToEntityMap())
         );
 
         $this->initializeOperations($filterProviders);
@@ -51,26 +52,11 @@ class DoctrineFilter
 
     /**
      * @throws InvalidFilterOperatorException
-     * @throws EmptyQueryBuilderException
      */
     public function apply(ActionList $actions): void
     {
         $this->applySorting($actions->getOrderByActions());
         $this->applyFilters($actions->getFilterActions());
-    }
-
-    /**
-     * @throws EmptyQueryBuilderException
-     */
-    private function getRootAlias(): string
-    {
-        $aliases = $this->queryBuilder->getRootAliases();
-
-        if (!isset($aliases[0])) {
-            throw new EmptyQueryBuilderException('Query builder must contain at least one alias');
-        }
-
-        return $aliases[0];
     }
 
     /**
@@ -84,13 +70,18 @@ class DoctrineFilter
     }
 
     /**
-     * @param OrderByAction[] $orderBy ;
-     *
-     * @throws EmptyQueryBuilderException
+     * @param OrderByAction[] $orderBy
      */
     private function applySorting(array $orderBy): void
     {
-        $exposedFields = $this->exposedFields[$this->getRootEntity()];
+        $rootAlias = $this->queryBuilderMetadata->getRootAlias();
+        $rootEntity = $this->queryBuilderMetadata->getAliasToEntityMap()[$rootAlias];
+
+        if (!array_key_exists($rootEntity, $this->exposedFields)) {
+            return;
+        }
+
+        $exposedFields = $this->exposedFields[$rootEntity];
 
         foreach ($orderBy as $value) {
             if (!array_key_exists($value->getField(), $exposedFields)) {
@@ -100,7 +91,7 @@ class DoctrineFilter
             $exposedField = $exposedFields[$value->getField()];
 
             $this->queryBuilder->addOrderBy(
-                sprintf('%s.%s', $this->getRootAlias(), $exposedField->getFieldName()),
+                sprintf('%s.%s', $rootAlias, $exposedField->getFieldName()),
                 $value->getDirection()
             );
         }
@@ -113,18 +104,18 @@ class DoctrineFilter
      */
     private function applyFilters(array $filterActions): void
     {
-        $exposedFields = $this->exposedFields[$this->getRootEntity()];
-
         foreach ($filterActions as $action) {
-            if (!array_key_exists($action->publicFieldName, $exposedFields)) {
+            $exposedField = $this->getExposedFieldForAction($action);
+
+            // Field is not mapped
+            if (!$exposedField) {
                 continue;
             }
 
-            $exposedField = $exposedFields[$action->publicFieldName];
             $operation = $this->getOperation($action, $exposedField);
 
             if ($operation instanceof BinaryFilterOperation) {
-                $this->applyBinaryFilter($exposedField->getFieldName(), $action->operator, $operation, $action->value);
+                $this->applyBinaryFilter($exposedField, $action, $operation);
             } elseif ($operation instanceof UnaryFilterOperation) {
                 $this->applyUnaryFilter($exposedField->getFieldName(), $operation);
             }
@@ -140,7 +131,7 @@ class DoctrineFilter
      */
     private function getOperation(FilterAction $action, ExposedField $exposedField): AbstractFilterOperation
     {
-        $operator = $action->operator;
+        $operator = $action->getOperator();
 
         if (!(isset($this->ops[$operator]) && in_array($operator, $exposedField->getOperators()))) {
             // If the exposed field references a filter that isn't registered that should not be shown here.
@@ -150,7 +141,7 @@ class DoctrineFilter
             $message = sprintf(
                 'Unknown operator "%s". Supported values for field %s are: [%s]',
                 $operator,
-                $action->publicFieldName,
+                $action->getPublicFieldName(),
                 $supportedFields
             );
 
@@ -160,16 +151,21 @@ class DoctrineFilter
         return $this->ops[$operator];
     }
 
-    /**
-     * @param mixed $value
-     */
-    private function applyBinaryFilter(string $field, string $operator, BinaryFilterOperation $operation, $value): void
-    {
-        $paramName = $this->getNextParameterName($field, $operator);
-        $aliasedFieldName = sprintf('%s.%s', $this->rootAlias, $field);
+    private function applyBinaryFilter(
+        ExposedField $field,
+        FilterAction $action,
+        BinaryFilterOperation $operation
+    ): void {
+        $paramName = $this->getNextParameterName($field->getFieldName(), $action->getOperator());
+
+        $aliasedFieldName = sprintf(
+            '%s.%s',
+            $this->queryBuilderMetadata->getEntityToAliasMap()[$field->getClassName()],
+            $field->getFieldName()
+        );
 
         $this->expressions[] = $operation->getOperationResult($aliasedFieldName, ":$paramName");
-        $this->queryBuilder->setParameter($paramName, $operation->getValue($value));
+        $this->queryBuilder->setParameter($paramName, $operation->getValue($action->value));
     }
 
     private function getNextParameterName(string $field, string $operator): string
@@ -182,7 +178,11 @@ class DoctrineFilter
 
     private function applyUnaryFilter(string $field, UnaryFilterOperation $operation): void
     {
-        $this->expressions[] = $operation->getOperationResult(sprintf('%s.%s', $this->rootAlias, $field));
+        $this->expressions[] = $operation->getOperationResult(sprintf(
+            '%s.%s',
+            $this->queryBuilderMetadata->getRootAlias(),
+            $field
+        ));
     }
 
     public function getQueryBuilder(): QueryBuilder
@@ -190,12 +190,15 @@ class DoctrineFilter
         return $this->queryBuilder;
     }
 
-    /**
-     * @return class-string
-     */
-    private function getRootEntity(): string
+    private function getExposedFieldForAction(FilterAction $action): ?ExposedField
     {
-        /* @phpstan-ignore-next-line */
-        return $this->queryBuilder->getRootEntities()[0];
+        $alias = $action->getEntityAlias() ?: $this->queryBuilderMetadata->getRootAlias();
+        $entity = $this->queryBuilderMetadata->getAliasToEntityMap()[$alias] ?? null;
+
+        if (!$entity) {
+            return null;
+        }
+
+        return $this->exposedFields[$entity][$action->getPublicFieldName()] ?? null;
     }
 }

@@ -27,7 +27,10 @@ expressions and can be constrained on which entities it should be possible to ex
 | `ends_with`   | Ends with             | `email[ends_with]=@gmail.com` |
 | `contains`    | Contains              | `name[containts]=d`           |
 
-\* By default the `field=value` syntax is off. It can be enabled as an equality operator in the `ActionList` 
+
+Filtering joined entities is also possible. See: [Filtering Joined Entities](joined-entities.md)
+
+\* By default the `field=value` syntax is off. It can be enabled as an equality operator in the `ActionList`
 constructors (`simpleEquality: true`).
 
 ### Sorting

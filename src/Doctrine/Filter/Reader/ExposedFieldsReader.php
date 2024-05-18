@@ -38,7 +38,7 @@ class ExposedFieldsReader implements FilterReaderInterface
             if ($attr instanceof Expose) {
                 $serializedName = $attr->serializedName ?: $reflectionProperty->getName();
 
-                $result[$serializedName] = new ExposedField($reflectionProperty->getName(), $attr->operators);
+                $result[$serializedName] = new ExposedField($class, $reflectionProperty->getName(), $attr->operators);
             }
         }
 

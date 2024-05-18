@@ -37,12 +37,6 @@ To create an instance of `DoctrineFilter` you need the following:
     * Create custom filter classes and include them during instantiation to make any new filters available.
 
 ```php
-use Maldoinc\Doctrine\Filter\Action\ActionList;
-use Maldoinc\Doctrine\Filter\DoctrineFilter;
-use Maldoinc\Doctrine\Filter\Provider\PresetFilterProvider;
-use Maldoinc\Doctrine\Filter\Reader\AttributeReader\NativeAttributeReader;
-use Maldoinc\Doctrine\Filter\Reader\ExposedFieldsReader;
-
 $queryBuilder = $doctrine->getRepository(Book::class)->createQueryBuilder('b');
 
 // ExposedFieldsReader is responsible from extracting any annotated fields 
@@ -54,6 +48,9 @@ $doctrineFilter = new DoctrineFilter($queryBuilder, $exposedFieldsReader, [new P
 // Now that we have a DoctrineFilter instance we need to tell it what filtering actions to take.
 $actions = ActionList::fromQueryString(
     // This is the query string that will be parsed
+    // If using symfony or HttpFoundation: DO NOT use `$request->getQueryString()` here
+    // Instead fetch the data from $request->server->get('QUERY_STRING').
+    // See ActionList::fromArray documentation for more details.
     queryString: $_SERVER['QUERY_STRING'],
     
     // The key under which to look for sorting actions

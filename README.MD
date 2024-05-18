@@ -1,6 +1,6 @@
 # doctrine-filter
 
-Quickly add advanced filtering and sorting capabilities to any resource in your APIs or Web apps that use
+Quickly add advanced filtering and sorting capabilities to resources in your application or API that uses
 Doctrine.
 
 [![License](http://poser.pugx.org/maldoinc/doctrine-filter/license)](https://packagist.org/packages/maldoinc/doctrine-filter)

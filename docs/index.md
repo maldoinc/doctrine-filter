@@ -6,5 +6,6 @@
 * [Symfony Guide](guide-symfony.md)
 
 **Advanced topics**
+* [Filter Joined Entities](joined-entities.md)
 * [Custom Filters](custom-filters.md)
 * [Custom Reader](custom-reader.md)

@@ -61,7 +61,9 @@ class FilteredQueryBuilder
 
         $filter = new DoctrineFilter($queryBuilder, $fieldReader, [new PresetFilterProvider()]);
         $actions = ActionList::fromArray(
-            data: $this->requestStack->getCurrentRequest()->query->all(),
+            // DO NOT USE $request->query->all() here.
+            // See ActionList::fromArray documentation for more details.
+            data: HeaderUtils::parseQuery($request->getQueryString()),
             
             // The key under which to look for sorting actions
             orderByKey: 'orderBy', 
@@ -103,4 +105,4 @@ class BookController extends Controller
 ```
 
 ---
-Next chapter: [Custom Filters](custom-filters.md)
+Next chapter: [Filter Joined Entities](joined-entities.md)
